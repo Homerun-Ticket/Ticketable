@@ -15,10 +15,10 @@ public class Seat {
 	private Long id;
 
 	@Column(length = 20)
-	private String row;
+	private String rowNum;
 
 	@Column(length = 20)
-	private String col;
+	private String colNum;
 
 	private boolean isBlind;
 	
@@ -27,9 +27,9 @@ public class Seat {
 	private Section section;
 
 	@Builder
-	public Seat(String row, String col, boolean isBlind, Section section) {
-		this.row = row;
-		this.col = col;
+	public Seat(String rowNum, String colNum, boolean isBlind, Section section) {
+		this.rowNum = rowNum;
+		this.colNum = colNum;
 		this.isBlind = isBlind;
 		this.section = section;
 	}
