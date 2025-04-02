@@ -20,6 +20,7 @@ public class PointHistory extends Timestamped {
 	
 	private Integer charge;
 	
+	@Column(length = 50)
 	@Enumerated(EnumType.STRING)
 	private PointHistoryType type;
 	

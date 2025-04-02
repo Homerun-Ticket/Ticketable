@@ -1,5 +1,8 @@
 package com.example.ticketable.domain.point.enums;
 
 public enum PointHistoryType {
-	PLUS, MINUS
+	RESERVATION,
+	BID,
+	BID_FAILED,
+	SELL
 }
