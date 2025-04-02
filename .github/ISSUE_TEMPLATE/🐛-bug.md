@@ -1,7 +1,10 @@
 ---
-name: "🐛 bug"
-about: "버그 수정 관련 이슈"
-labels: bug
+name: "\U0001F41B Bug"
+about: 버그 수정 관련 이슈
+title: "\U0001F41B Bug : "
+labels: ''
+assignees: ''
+
 ---
 
 ## 버그 설명
