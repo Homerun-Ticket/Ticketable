@@ -17,11 +17,7 @@ public class Ticket {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "seat_id", nullable = false)
-	private Seat seat;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
@@ -31,8 +27,7 @@ public class Ticket {
 	private Game game;
 
 	@Builder
-	public Ticket(Seat seat, Member member, Game game) {
-		this.seat = seat;
+	public Ticket(Member member, Game game) {
 		this.member = member;
 		this.game = game;
 	}
