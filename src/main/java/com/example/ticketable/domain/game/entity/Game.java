@@ -13,18 +13,22 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 public class Game {
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
+	@Column(length = 50)
 	private String away;
+
+	@Column(length = 50)
 	private String home;
-	
+
+	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
 	private GameType type;
 	
 	private Integer point;
+
 	private LocalDateTime startTime;
 	
 	@Builder

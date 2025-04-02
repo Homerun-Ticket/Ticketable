@@ -10,13 +10,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 public class Stadium {
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
+	@Column(length = 50)
 	private String name;
+
+	@Column(length = 100)
 	private String location;
+
 	private Integer capacity;
 	
 	@Builder

@@ -10,13 +10,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 public class Section {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
+	@Column(length = 20)
 	private String type;
+
+	@Column(length = 20)
 	private String code;
+
 	private Integer extraCharge;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

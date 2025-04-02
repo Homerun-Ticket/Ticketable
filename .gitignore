@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### commit template ###
+.git-commit-template.txt

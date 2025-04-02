@@ -49,7 +49,7 @@ dependencies {
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
     // Redisson
-    implementation 'org.redisson:redisson-spring-boot-starter:3.37.0'
+//    implementation 'org.redisson:redisson-spring-boot-starter:3.37.0'
 }
 
 tasks.named('test') {
