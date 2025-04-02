@@ -5,6 +5,7 @@ import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +29,11 @@ public class Ticket {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "game_id", nullable = false)
 	private Game game;
+
+	@Builder
+	public Ticket(Seat seat, Member member, Game game) {
+		this.seat = seat;
+		this.member = member;
+		this.game = game;
+	}
 }
