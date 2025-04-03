@@ -14,7 +14,8 @@ public enum ErrorCode {
 	// 경기장
 	
 	// 티켓
-	
+	TICKET_NOT_FOUND("해당하는 티켓을 찾을 수 없습니다.", BAD_REQUEST),
+	TICKET_PAYMENT_NOT_FOUND("티켓 결제 내역이 존재하지않습니다.", BAD_REQUEST),
 	// 경매
 	
 	// 유저

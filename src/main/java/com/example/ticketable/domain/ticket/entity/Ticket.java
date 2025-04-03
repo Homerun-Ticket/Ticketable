@@ -2,8 +2,14 @@ package com.example.ticketable.domain.ticket.entity;
 
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.member.entity.Member;
-import com.example.ticketable.domain.stadium.entity.Seat;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +31,8 @@ public class Ticket {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "game_id", nullable = false)
 	private Game game;
+
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public Ticket(Member member, Game game) {
