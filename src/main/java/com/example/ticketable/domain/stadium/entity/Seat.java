@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -26,11 +28,14 @@ public class Seat {
 	@JoinColumn(name = "section_id", nullable = false)
 	private Section section;
 
+	private LocalDateTime deletedAt;
+
 	@Builder
 	public Seat(String rowNum, String colNum, boolean isBlind, Section section) {
 		this.rowNum = rowNum;
 		this.colNum = colNum;
 		this.isBlind = isBlind;
 		this.section = section;
+		this.deletedAt = null;
 	}
 }

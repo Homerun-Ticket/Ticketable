@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public enum ErrorCode {
 	
 	// 경기장
-	
+	STADIUM_NOT_FOUND("해당하는 경기장을 찾을 수 없습니다.", NOT_FOUND),
 	// 티켓
 	
 	// 경매

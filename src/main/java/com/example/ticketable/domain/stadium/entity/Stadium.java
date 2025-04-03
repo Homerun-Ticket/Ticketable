@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -21,11 +23,14 @@ public class Stadium {
 	private String location;
 
 	private Integer capacity;
+
+	private LocalDateTime deletedAt;
 	
 	@Builder
 	public Stadium(String name, String location, Integer capacity) {
 		this.name = name;
 		this.location = location;
 		this.capacity = capacity;
+		this.deletedAt = null;
 	}
 }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -25,6 +27,8 @@ public class Section {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "stadium_id", nullable = false)
 	private Stadium stadium;
+
+	private LocalDateTime deletedAt;
 	
 	@Builder
 	public Section(String type, String code, Integer extraCharge, Stadium stadium) {
@@ -32,5 +36,6 @@ public class Section {
 		this.code = code;
 		this.extraCharge = extraCharge;
 		this.stadium = stadium;
+		this.deletedAt = null;
 	}
 }
