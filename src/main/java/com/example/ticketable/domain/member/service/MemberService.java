@@ -6,14 +6,12 @@ import com.example.ticketable.domain.member.dto.request.UpdatePasswordRequest;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.ticketable.common.exception.ErrorCode.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberService {
@@ -35,12 +33,10 @@ public class MemberService {
 	
 	@Transactional
 	public void deleteMember(Long authId, DeleteMemberRequest request) {
-		log.info("삭제 진행");
 		Member member = getMember(authId);
 		matchPassword(request.getPassword(), member.getPassword());
 		
-		member.setDeletedAt();
-		log.info("삭제 완료");
+		member.deleteMember();
 	}
 	
 	/**

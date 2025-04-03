@@ -32,9 +32,7 @@ public class MemberController {
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody DeleteMemberRequest request
 	) {
-		log.info("삭제 시작");
 		memberService.deleteMember(auth.getId(), request);
-		log.info("삭제 끝");
 		return ResponseEntity.ok("멤버가 삭제되었습니다.");
 	}
 }
