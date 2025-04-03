@@ -4,7 +4,7 @@ import com.example.ticketable.domain.stadium.entity.Stadium;
 import lombok.Getter;
 
 @Getter
-public class StadiumCreateResponse {
+public class StadiumUpdateResponse {
     private final Long id;
 
     private final String name;
@@ -15,7 +15,7 @@ public class StadiumCreateResponse {
 
     private final String imagePath;
 
-    public StadiumCreateResponse(Long id, String name, String location, Integer capacity, String imagePath) {
+    public StadiumUpdateResponse(Long id, String name, String location, Integer capacity, String imagePath) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -23,8 +23,8 @@ public class StadiumCreateResponse {
         this.imagePath = imagePath;
     }
 
-    public static StadiumCreateResponse of(Stadium stadium) {
-        return new StadiumCreateResponse(
+    public static StadiumUpdateResponse of(Stadium stadium) {
+        return new StadiumUpdateResponse(
                 stadium.getId(),
                 stadium.getName(),
                 stadium.getLocation(),

@@ -13,11 +13,14 @@ public class StadiumGetResponse {
 
     private final Integer capacity;
 
-    public StadiumGetResponse(Long id, String name, String location, Integer capacity) {
+    private final String imagePath;
+
+    public StadiumGetResponse(Long id, String name, String location, Integer capacity, String imagePath) {
         this.id = id;
         this.name = name;
         this.location = location;
         this.capacity = capacity;
+        this.imagePath = imagePath;
     }
 
     public static StadiumGetResponse of(Stadium stadium) {
@@ -25,7 +28,8 @@ public class StadiumGetResponse {
                 stadium.getId(),
                 stadium.getName(),
                 stadium.getLocation(),
-                stadium.getCapacity()
+                stadium.getCapacity(),
+                stadium.getImagePath()
         );
     }
 }

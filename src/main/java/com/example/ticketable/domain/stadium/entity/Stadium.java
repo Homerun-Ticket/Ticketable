@@ -24,13 +24,30 @@ public class Stadium {
 
 	private Integer capacity;
 
+	private String imagePath;
+
 	private LocalDateTime deletedAt;
+
+
 	
 	@Builder
-	public Stadium(String name, String location, Integer capacity) {
+	public Stadium(String name, String location, Integer capacity, String imagePath) {
 		this.name = name;
 		this.location = location;
 		this.capacity = capacity;
+		this.imagePath = imagePath;
 		this.deletedAt = null;
+	}
+
+	public void updateName(String name) {
+		this.name = name;
+	}
+
+	public void delete() {
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void updateImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 }
