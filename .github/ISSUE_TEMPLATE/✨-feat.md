@@ -1,7 +1,10 @@
 ---
-name: "✨ feat"
-about: "새로운 기능 추가 또는 구현"
-labels: feat
+name: "✨ Feat"
+about: 새로운 기능 추가 또는 구현
+title: "✨ Feat : "
+labels: ''
+assignees: ''
+
 ---
 
 ## 기능 설명

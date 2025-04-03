@@ -1,7 +1,10 @@
 ---
-name: "🧪 test"
-about: "테스트와 관련된 작업"
-labels: test
+name: "\U0001F9EA Test"
+about: 테스트와 관련된 작업
+title: "\U0001F9EA Test : "
+labels: ''
+assignees: ''
+
 ---
 
 ## 테스트 목적 및 계획

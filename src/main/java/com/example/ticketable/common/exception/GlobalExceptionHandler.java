@@ -1,45 +1,41 @@
 package com.example.ticketable.common.exception;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	
-	@ExceptionHandler(ResponseStatusException.class)
-	public ResponseEntity<Map<String, Object>> responseStatusExceptionException(ErrorCode ex) {
-		return getErrorResponse(ex.getStatus(), ex.getMessage());
+	@ExceptionHandler(ServerException.class)
+	public ResponseEntity<ErrorResponse> responseStatusExceptionException(ServerException e) {
+		ErrorCode errorCode = e.getErrorCode();
+		String status = errorCode.getStatus().toString();
+		String message = errorCode.getMessage();
+		String code = errorCode.name();
+		ErrorResponse response = new ErrorResponse(status, message, code);
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
 	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<Map<String, Object>> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
-		HttpStatus status = HttpStatus.BAD_REQUEST;
-		Map<String, Object> errorResponse = new HashMap<>();
-		errorResponse.put("status", status.name());
-		errorResponse.put("code", status.value());
-		
+	public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
+		HttpStatus status = BAD_REQUEST;
 		Map<String, String> fieldErrors = new HashMap<>();
 		ex.getBindingResult().getFieldErrors().forEach(error ->
 			fieldErrors.put(error.getField(), error.getDefaultMessage())
 		);
-		errorResponse.put("errors", fieldErrors);
-		errorResponse.put("message", "잘못된 요청입니다.");
-		return new ResponseEntity<>(errorResponse, status);
-	}
-	
-	public ResponseEntity<Map<String, Object>> getErrorResponse(HttpStatus status, String message) {
-		Map<String, Object> errorResponse = new HashMap<>();
-		errorResponse.put("status", status.name());
-		errorResponse.put("code", status.value());
-		errorResponse.put("message", message);
-		
-		return new ResponseEntity<>(errorResponse, status);
+
+		ErrorResponse response = new ErrorResponse(status.name(),
+			"잘못된 요청입니다.",
+			String.valueOf(status.value()),
+			fieldErrors );
+
+		return ResponseEntity.status(BAD_REQUEST).body(response);
 	}
 }

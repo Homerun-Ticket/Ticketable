@@ -1,7 +1,10 @@
 ---
-name: "🔄 refactor"
-about: "코드 리팩터링 작업"
-labels: refactor
+name: "\U0001F504 Refactor"
+about: 코드 리팩터링 작업
+title: "\U0001F504 Refactor : "
+labels: ''
+assignees: ''
+
 ---
 
 ## 리팩터링 대상 코드/모듈
