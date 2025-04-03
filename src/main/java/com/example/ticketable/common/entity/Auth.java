@@ -10,10 +10,10 @@ import java.util.List;
 @Getter
 public class Auth {
 	
-	private Long id;
-	private String email;
-	private MemberRole role;
-	private List<? extends GrantedAuthority> authority;
+	private final Long id;
+	private final String email;
+	private final MemberRole role;
+	private final List<? extends GrantedAuthority> authority;
 	
 	public Auth(Long id, String email, MemberRole role) {
 		this.id = id;
