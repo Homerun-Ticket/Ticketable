@@ -19,7 +19,6 @@ public enum ErrorCode {
 	
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),
-	USER_NAME_DUPLICATION("다른 유저와 이름이 중복됩니다.", CONFLICT),
 	USER_NOT_LOGIN("로그인이 필요합니다. 로그인을 해주세요.", UNAUTHORIZED),
 	USER_NOT_FOUND("해당하는 유저를 찾을 수 없습니다.", NOT_FOUND),
 	INVALID_PASSWORD("패스워드가 올바르지 않습니다.", BAD_REQUEST),

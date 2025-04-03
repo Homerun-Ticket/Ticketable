@@ -21,7 +21,6 @@ public class Member extends Timestamped {
 	
 	@Column(length = 50, unique = true)
 	private String email;
-	@Column(length = 50)
 	private String password;
 	@Column(length = 20)
 	private String name;
