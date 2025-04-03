@@ -15,6 +15,7 @@ public enum ErrorCode {
 	STADIUM_NOT_FOUND("해당하는 경기장을 찾을 수 없습니다.", NOT_FOUND),
 	SECTION_NOT_FOUND("해당하는 구역을 찾을 수 없습니다.", NOT_FOUND),
 	SEAT_NOT_FOUND("해당하는 좌석을 찾을 수 없습니다.", NOT_FOUND),
+	COLUMN_NUMS_AND_BLIND_STATUS_NOT_SAME_SIZE("열 번호와 시야 방해 여부 리스트의 크기는 같아야 합니다.", HttpStatus.BAD_REQUEST),
 	// 티켓
 	
 	// 경매

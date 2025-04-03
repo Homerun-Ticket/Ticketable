@@ -17,10 +17,7 @@ public class Seat {
 	private Long id;
 
 	@Column(length = 20)
-	private String rowNum;
-
-	@Column(length = 20)
-	private String colNum;
+	private String position;
 
 	private boolean isBlind;
 	
@@ -31,9 +28,8 @@ public class Seat {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Seat(String rowNum, String colNum, boolean isBlind, Section section) {
-		this.rowNum = rowNum;
-		this.colNum = colNum;
+	public Seat(String position, boolean isBlind, Section section) {
+		this.position = position;
 		this.isBlind = isBlind;
 		this.section = section;
 		this.deletedAt = null;

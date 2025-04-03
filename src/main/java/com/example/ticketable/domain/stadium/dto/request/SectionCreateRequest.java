@@ -16,12 +16,4 @@ public class SectionCreateRequest {
         this.code = code;
         this.extraCharge = extraCharge;
     }
-
-    public static SectionCreateRequest of(Section section) {
-        return new SectionCreateRequest(
-                section.getType(),
-                section.getCode(),
-                section.getExtraCharge()
-        );
-    }
 }

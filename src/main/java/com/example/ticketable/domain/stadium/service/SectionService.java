@@ -49,4 +49,8 @@ public class SectionService {
 
         section.delete();
     }
+
+    public Section getById(Long sectionId) {
+        return sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
+    }
 }

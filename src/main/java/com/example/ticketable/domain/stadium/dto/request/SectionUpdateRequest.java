@@ -16,12 +16,4 @@ public class SectionUpdateRequest {
         this.code = code;
         this.extraCharge = extraCharge;
     }
-
-    public static SectionUpdateRequest of(Section section) {
-        return new SectionUpdateRequest(
-                section.getType(),
-                section.getCode(),
-                section.getExtraCharge()
-        );
-    }
 }
