@@ -67,4 +67,12 @@ public class AuctionService {
 		return AuctionResponse.of(savedAuction, ticketInfo);
 	}
 
+	public AuctionResponse getAuction(Long auctionId) {
+		Auction auction = auctionRepository.findById(auctionId)
+			.orElseThrow(() -> new ServerException(AUCTION_NOT_FOUND));
+
+		AuctionTicketInfo ticketInfo = auctionRepository.findTicketInfo(auction.getTicket());
+
+		return AuctionResponse.of(auction, ticketInfo);
+	}
 }
