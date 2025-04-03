@@ -27,4 +27,12 @@ public class Point {
 		this.point = point;
 		this.member = member;
 	}
+	
+	public void increasePoint(Integer charge) {
+		this.point += charge;
+	}
+	
+	public void decreasePoint(Integer charge) {
+		this.point -= charge;
+	}
 }

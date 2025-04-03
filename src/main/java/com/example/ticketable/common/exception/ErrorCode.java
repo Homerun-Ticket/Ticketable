@@ -17,6 +17,9 @@ public enum ErrorCode {
 	
 	// 경매
 	
+	// 포인트
+	HAVE_NOT_POINT("해당 유저가 포인트를 가지고 있지 않습니다.", BAD_REQUEST),
+	
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),
 	USER_NOT_LOGIN("로그인이 필요합니다. 로그인을 해주세요.", UNAUTHORIZED),
