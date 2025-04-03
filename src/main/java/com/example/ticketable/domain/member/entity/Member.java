@@ -42,4 +42,8 @@ public class Member extends Timestamped {
 	public void setDeletedAt() {
 		this.deletedAt = LocalDateTime.now();
 	}
+	
+	public void changePassword(String password) {
+		this.password = password;
+	}
 }
