@@ -21,7 +21,6 @@ public class Member extends Timestamped {
 	
 	@Column(length = 50, unique = true)
 	private String email;
-	@Column(length = 50)
 	private String password;
 	@Column(length = 20)
 	private String name;
@@ -40,7 +39,11 @@ public class Member extends Timestamped {
 		this.role = role;
 	}
 	
-	public void setDeletedAt() {
+	public void memberDelete() {
 		this.deletedAt = LocalDateTime.now();
+	}
+	
+	public void changePassword(String password) {
+		this.password = password;
 	}
 }
