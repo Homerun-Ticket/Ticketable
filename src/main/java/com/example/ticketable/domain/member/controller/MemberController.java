@@ -6,19 +6,18 @@ import com.example.ticketable.domain.member.dto.request.UpdatePasswordRequest;
 import com.example.ticketable.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/members")
 public class MemberController {
 	
 	private final MemberService memberService;
 	
-	@PatchMapping("/api/v1/members")
+	@PatchMapping
 	public ResponseEntity<String> updatePassword(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody UpdatePasswordRequest request
@@ -27,7 +26,7 @@ public class MemberController {
 		return ResponseEntity.ok("비밀번호가 변경되었습니다.");
 	}
 	
-	@DeleteMapping("/api/v1/members")
+	@DeleteMapping
 	public ResponseEntity<String> deleteMember(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody DeleteMemberRequest request
