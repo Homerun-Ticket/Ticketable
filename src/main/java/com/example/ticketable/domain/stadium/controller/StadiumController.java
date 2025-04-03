@@ -23,10 +23,10 @@ public class StadiumController {
 
     @GetMapping("{stadiumId}")
     public ResponseEntity<StadiumGetResponse> getStadium(@PathVariable Long stadiumId) {
-        return ResponseEntity.ok(stadiumService.getStadium(stadiumId));
+        return ResponseEntity.ok(stadiumService.getStadiumDto(stadiumId));
     }
 
-    @PatchMapping("{stadiumId}")
+    @PutMapping("{stadiumId}")
     public ResponseEntity<StadiumUpdateResponse> updateStadium(
             @PathVariable Long stadiumId,
             @RequestBody StadiumUpdateRequest requset

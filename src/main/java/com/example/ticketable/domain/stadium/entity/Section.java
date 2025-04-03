@@ -38,4 +38,20 @@ public class Section {
 		this.stadium = stadium;
 		this.deletedAt = null;
 	}
+
+	public void updateType(String type) {
+		this.type = type;
+	}
+
+	public void updateCode(String code) {
+		this.code = code;
+	}
+
+	public void updateExtraChange(Integer extraCharge) {
+		this.extraCharge = extraCharge;
+	}
+
+	public void delete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }

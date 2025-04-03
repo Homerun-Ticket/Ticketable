@@ -30,13 +30,12 @@ public class StadiumService {
     }
 
 
-    public StadiumGetResponse getStadium(Long stadiumId) {
+    public StadiumGetResponse getStadiumDto(Long stadiumId) {
         Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
 
         // 좌석 정보 추가 예정
         return StadiumGetResponse.of(stadium);
     }
-
 
     public StadiumUpdateResponse updateStadium(Long stadiumId, StadiumUpdateRequest request) {
         Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
@@ -50,5 +49,9 @@ public class StadiumService {
     public void deleteStadium(Long stadiumId) {
         Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
         stadium.delete();
+    }
+
+    public Stadium getStadium(Long stadiumId) {
+         return stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
     }
 }
