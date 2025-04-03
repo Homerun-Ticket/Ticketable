@@ -39,7 +39,7 @@ public class Member extends Timestamped {
 		this.role = role;
 	}
 	
-	public void deleteMember() {
+	public void memberDelete() {
 		this.deletedAt = LocalDateTime.now();
 	}
 	

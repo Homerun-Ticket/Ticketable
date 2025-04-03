@@ -36,7 +36,7 @@ public class MemberService {
 		Member member = getMember(authId);
 		matchPassword(request.getPassword(), member.getPassword());
 		
-		member.deleteMember();
+		member.memberDelete();
 	}
 	
 	/**
