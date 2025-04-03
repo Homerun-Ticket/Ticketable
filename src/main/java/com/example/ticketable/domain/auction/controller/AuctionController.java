@@ -44,4 +44,12 @@ public class AuctionController {
 		return ResponseEntity.ok(auctionService.getAuction(auctionId));
 	}
 
+	@GetMapping
+	public ResponseEntity<Page<AuctionResponse>> getAuctions(
+		@ModelAttribute AuctionSearchCondition dto,
+		@PageableDefault(page = 1, size = 10) Pageable pageRequest
+	) {
+		return ResponseEntity.ok(auctionService.getAuctions(dto, convertPageable(pageRequest)));
+	}
+
 }

@@ -24,6 +24,8 @@ public class AuctionResponse {
 
 	private final String seatInfo;
 
+	private final Integer seatCount;
+
 	private final Boolean isTogether;
 
 	private final LocalDateTime gameStartTime;
@@ -40,15 +42,16 @@ public class AuctionResponse {
 
 	private final LocalDateTime deletedAt;
 
-	public static AuctionResponse of(Auction auction, AuctionTicketInfo ticketInfo) {
+	public static AuctionResponse of(Auction auction) {
 		return new AuctionResponse(
 			auction.getId(),
 			auction.getStartPoint(),
 			auction.getBidPoint(),
-			ticketInfo.getStandardPoint(),
-			ticketInfo.getSectionInfo(),
-			ticketInfo.getSeatInfo(),
-			ticketInfo.getIsTogether(),
+			auction.getAuctionTicketInfo().getStandardPoint(),
+			auction.getAuctionTicketInfo().getSectionInfo(),
+			auction.getAuctionTicketInfo().getSeatInfo(),
+			auction.getAuctionTicketInfo().getSeatCount(),
+			auction.getAuctionTicketInfo().getIsTogether(),
 			auction.getTicket().getGame().getStartTime(),
 			auction.getTicket().getGame().getHome(),
 			auction.getTicket().getGame().getAway(),

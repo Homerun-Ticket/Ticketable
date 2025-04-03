@@ -31,6 +31,10 @@ public class Auction {
 	private Integer startPoint;
 
 	private Integer bidPoint;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "auction_ticket_info_id", nullable = false)
+	private AuctionTicketInfo auctionTicketInfo;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ticket_id", nullable = false)
@@ -59,9 +63,10 @@ public class Auction {
 	private LocalDateTime deletedAt;
 	
 	@Builder
-	public Auction(Integer startPoint, Integer bidPoint, Ticket ticket, Member seller, Member bidder) {
+	public Auction(Integer startPoint, Integer bidPoint, AuctionTicketInfo auctionTicketInfo, Ticket ticket, Member seller, Member bidder) {
 		this.startPoint = startPoint;
 		this.bidPoint = bidPoint;
+		this.auctionTicketInfo = auctionTicketInfo;
 		this.ticket = ticket;
 		this.seller = seller;
 		this.bidder = bidder;

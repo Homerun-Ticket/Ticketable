@@ -1,4 +1,4 @@
-package com.example.ticketable.domain.auction.dto.response;
+package com.example.ticketable.domain.auction.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-public class AuctionTicketInfo {
+public class AuctionTicketInfoDto {
 
 	private final Integer standardPoint;
 
@@ -14,13 +14,18 @@ public class AuctionTicketInfo {
 
 	private final String seatInfo;
 
+	private final Integer seatCount;
+
 	private final Boolean isTogether;
 
-	public static AuctionTicketInfo of(Integer standardPoint, String sectionInfo, String seatInfo, Boolean isTogether) {
-		return new AuctionTicketInfo(
+	public static AuctionTicketInfoDto of(
+		Integer standardPoint, String sectionInfo, String seatInfo,	Integer seatCount, Boolean isTogether
+	) {
+		return new AuctionTicketInfoDto(
 			standardPoint,
 			sectionInfo,
 			seatInfo,
+			seatCount,
 			isTogether
 		);
 	}
