@@ -28,7 +28,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	private final JwtUtil jwtUtil;
-	private final MemberRepository memberRepository;
 	
 	@Override
 	protected void doFilterInternal(
