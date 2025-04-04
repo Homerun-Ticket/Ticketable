@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.example.ticketable.domain.auction.entity.Auction;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

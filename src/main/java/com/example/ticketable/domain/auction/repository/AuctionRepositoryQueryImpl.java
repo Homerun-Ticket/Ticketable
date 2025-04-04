@@ -47,26 +47,23 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 			.join(ticketSeat.seat, seat)
 			.join(seat.section, section)
 			.where(ticketSeat.ticket.eq(ticket))
-			.orderBy(
-				seat.rowNum.asc(),
-				seat.colNum.asc()
-			)
 			.fetch();
 
 		String type = seats.get(0).getSection().getType();
 		String code = seats.get(0).getSection().getCode();
-		String sectionInfo = type + "|" + code;
+		String sectionInfo = type + " | " + code;
 
 		String seatInfo = seats.stream()
-			.map(seat -> seat.getRowNum() + "-" + seat.getColNum())
-			.collect(Collectors.joining(","));
+			.map(Seat::getPosition)
+			.collect(Collectors.joining(" "));
 
 		Integer seatCount = seats.size();
 
 		Boolean isTogether = true;
-		String standard = seats.get(0).getRowNum();
+		String firstRow = seats.get(0).getPosition().split("열 ")[0];
 		for (Seat seat : seats) {
-			if (!standard.equals(seat.getRowNum())) {
+			String currentRow = seat.getPosition().split("열 ")[0];
+			if (!firstRow.equals(currentRow)) {
 				isTogether = false;
 				break;
 			}

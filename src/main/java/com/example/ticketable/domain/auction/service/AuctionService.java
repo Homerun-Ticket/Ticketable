@@ -10,7 +10,6 @@ import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
 import com.example.ticketable.domain.auction.entity.AuctionHistory;
 import com.example.ticketable.domain.auction.entity.AuctionTicketInfo;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +26,8 @@ import com.example.ticketable.domain.auction.repository.AuctionHistoryRepository
 import com.example.ticketable.domain.auction.repository.AuctionRepository;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.member.repository.MemberRepository;
+import com.example.ticketable.domain.point.enums.PointHistoryType;
+import com.example.ticketable.domain.point.service.PointService;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.example.ticketable.domain.ticket.repository.TicketRepository;
 
@@ -40,6 +41,7 @@ public class AuctionService {
 	private final TicketRepository ticketRepository;
 	private final AuctionRepository auctionRepository;
 	private final AuctionHistoryRepository auctionHistoryRepository;
+	private final PointService pointService;
 
 	@Transactional
 	public AuctionResponse createAuction(Auth auth, AuctionCreateRequest dto) {
@@ -117,7 +119,11 @@ public class AuctionService {
 
 		auctionHistoryRepository.save(auctionHistory);
 
+		pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
+
 		auction.updateBid(bidder, dto.getBidPoint());
+
+		pointService.decreasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID);
 
 		return AuctionResponse.of(auction);
 	}
@@ -146,7 +152,7 @@ public class AuctionService {
 
 	private Ticket findTicket(AuctionCreateRequest dto) {
 		return ticketRepository.findById(dto.getTicketId())
-			.orElseThrow(() -> new ServerException(USER_ACCESS_DENIED));
+			.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 	}
 
 	private Member findMember(Auth auth) {
@@ -155,6 +161,7 @@ public class AuctionService {
 	}
 
 	@Scheduled(fixedRate = 60000) // 1분마다 실행
+	@Transactional
 	public void closeExpiredAuctions() {
 		LocalDateTime standardTime = LocalDateTime.now().minusHours(24);
 
@@ -164,7 +171,7 @@ public class AuctionService {
 			if (auction.getDeletedAt() == null) {
 				auction.setDeletedAt();
 			}
-			// 포인트 이력 로직
+			pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
 		}
 
 		auctionRepository.saveAll(expiredAuctions);
