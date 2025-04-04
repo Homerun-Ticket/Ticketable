@@ -102,7 +102,6 @@ public class AuctionService {
 		Auction auction = findAuction(auctionId);
 
 		if (auction.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now())) {
-			auction.setDeletedAt();
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
@@ -176,16 +175,23 @@ public class AuctionService {
 	@Scheduled(fixedRate = 60000) // 1분마다 실행
 	@Transactional
 	public void closeExpiredAuctions() {
-		LocalDateTime standardTime = LocalDateTime.now().minusHours(24);
+		LocalDateTime standardTime = LocalDateTime.now().minusMinutes(1);
 
-		List<Auction> expiredAuctions = auctionRepository.findByCreatedAtBefore(standardTime);
+		List<Auction> expiredAuctions = auctionRepository.findAllByCreatedAtBetweenAndDeletedAtIsNull(
+			standardTime.minusMinutes(60), standardTime
+		);
 
-		for (Auction auction : expiredAuctions) {
-			if (auction.getDeletedAt() == null) {
+		if (!expiredAuctions.isEmpty()) {
+			for (Auction auction : expiredAuctions) {
 				auction.setDeletedAt();
+
+				if (auction.getBidder() != null) {
+					pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
+					auction.getTicket().changeOwner(auction.getBidder());
+				}
 			}
-			pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
+
+			auctionRepository.saveAll(expiredAuctions);
 		}
-		auctionRepository.saveAll(expiredAuctions);
 	}
 }

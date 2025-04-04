@@ -15,6 +15,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 
 	Optional<Auction> findByIdAndDeletedAtIsNull(Long id);
 
-	@EntityGraph(attributePaths = {"member"})
-	List<Auction> findByCreatedAtBefore(LocalDateTime createdAtBefore);
+	@EntityGraph(attributePaths = {"seller", "bidder", "ticket"})
+	List<Auction> findAllByCreatedAtBetween(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
+
+	List<Auction> findAllByCreatedAtBetweenAndDeletedAtIsNotNull(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
+
+	List<Auction> findAllByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
 }
