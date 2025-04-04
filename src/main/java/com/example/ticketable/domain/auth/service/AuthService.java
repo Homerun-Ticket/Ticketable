@@ -8,15 +8,15 @@ import com.example.ticketable.domain.auth.dto.response.AuthResponse;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.member.repository.MemberRepository;
 import com.example.ticketable.domain.member.role.MemberRole;
+import com.example.ticketable.domain.point.entity.Point;
+import com.example.ticketable.domain.point.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.ticketable.common.exception.ErrorCode.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AuthService {
@@ -24,6 +24,7 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
+	private final PointRepository pointRepository;
 	
 	@Transactional
 	public AuthResponse signup(SignupRequest request) {
@@ -41,8 +42,13 @@ public class AuthService {
 			.password(passwordEncoder.encode(request.getPassword()))
 			.role(MemberRole.of(request.getRole()))
 			.build();
-		
 		Member savedMember = memberRepository.save(member);
+		
+		Point point = Point.builder()
+			.point(0)
+			.member(savedMember)
+			.build();
+		pointRepository.save(point);
 		
 		String accessToken = jwtUtil.createAccessToken(
 			savedMember.getId(), savedMember.getEmail(), savedMember.getName(), savedMember.getRole()
