@@ -13,8 +13,8 @@ import com.example.ticketable.domain.ticket.entity.Ticket;
 public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryQuery {
 	boolean existsByTicket(Ticket ticket);
 
-	@EntityGraph(attributePaths = {"auction_history"})
 	Optional<Auction> findByIdAndDeletedAtIsNull(Long id);
 
+	@EntityGraph(attributePaths = {"member"})
 	List<Auction> findByCreatedAtBefore(LocalDateTime createdAtBefore);
 }

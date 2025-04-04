@@ -88,7 +88,7 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 					game.startTime,
 					game.home,
 					game.away,
-					game.type,
+					game.type.stringValue(),
 					auction.createdAt,
 					auction.updatedAt,
 					auction.deletedAt

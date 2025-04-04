@@ -24,6 +24,7 @@ import com.example.ticketable.domain.auction.dto.response.AuctionResponse;
 import com.example.ticketable.domain.auction.entity.Auction;
 import com.example.ticketable.domain.auction.repository.AuctionHistoryRepository;
 import com.example.ticketable.domain.auction.repository.AuctionRepository;
+import com.example.ticketable.domain.auction.repository.AuctionTicketInfoRepository;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.member.repository.MemberRepository;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
@@ -41,6 +42,7 @@ public class AuctionService {
 	private final TicketRepository ticketRepository;
 	private final AuctionRepository auctionRepository;
 	private final AuctionHistoryRepository auctionHistoryRepository;
+	private final AuctionTicketInfoRepository auctionTicketInfoRepository;
 	private final PointService pointService;
 
 	@Transactional
@@ -67,14 +69,17 @@ public class AuctionService {
 			.standardPoint(ticketInfo.getStandardPoint())
 			.sectionInfo(ticketInfo.getSectionInfo())
 			.seatInfo(ticketInfo.getSeatInfo())
+			.seatCount(ticketInfo.getSeatCount())
 			.isTogether(ticketInfo.getIsTogether())
 			.build();
+
+		AuctionTicketInfo savedAuctionTicketInfo = auctionTicketInfoRepository.save(auctionTicketInfo);
 
 		Auction auction = Auction.builder()
 			.seller(seller)
 			.ticket(ticket)
 			.startPoint(dto.getStartPoint())
-			.auctionTicketInfo(auctionTicketInfo)
+			.auctionTicketInfo(savedAuctionTicketInfo)
 			.build();
 
 		Auction savedAuction = auctionRepository.save(auction);
@@ -101,8 +106,14 @@ public class AuctionService {
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
-		if (dto.getBidPoint() % 100 > 0 || auction.getBidPoint() + 100 > dto.getBidPoint()) {
-			throw new ServerException(INVALID_BIDDING_AMOUNT);
+		if (auction.getBidPoint() == null) {
+			if (dto.getBidPoint() % 100 > 0 || auction.getStartPoint() + 100 > dto.getBidPoint()) {
+				throw new ServerException(INVALID_BIDDING_AMOUNT);
+			}
+		} else {
+			if (dto.getBidPoint() % 100 > 0 || auction.getBidPoint() + 100 > dto.getBidPoint()) {
+				throw new ServerException(INVALID_BIDDING_AMOUNT);
+			}
 		}
 
 		Member bidder = findMember(auth);
@@ -119,7 +130,9 @@ public class AuctionService {
 
 		auctionHistoryRepository.save(auctionHistory);
 
-		pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
+		if (auction.getBidder() != null) {
+			pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
+		}
 
 		auction.updateBid(bidder, dto.getBidPoint());
 
@@ -138,7 +151,7 @@ public class AuctionService {
 
 		Member requestMember = findMember(auth);
 
-		if (auction.getSeller().equals(requestMember)) {
+		if (!auction.getSeller().equals(requestMember)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
@@ -151,7 +164,7 @@ public class AuctionService {
 	}
 
 	private Ticket findTicket(AuctionCreateRequest dto) {
-		return ticketRepository.findById(dto.getTicketId())
+		return ticketRepository.findByIdWithGameAndMember(dto.getTicketId())
 			.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 	}
 

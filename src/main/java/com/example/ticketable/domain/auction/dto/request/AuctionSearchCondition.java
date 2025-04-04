@@ -3,19 +3,24 @@ package com.example.ticketable.domain.auction.dto.request;
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class AuctionSearchCondition {
 
-	@NotBlank(message = "홈 팀은 필수값입니다.")
 	private String home;
 
 	private String away;
 
 	private Integer seatCount;
 
-	private Boolean isTogether;
+	private Boolean isTogether = false;
 
 	private LocalDateTime startTime;
 }
