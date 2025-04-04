@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class TicketController {
 	@GetMapping("/v1/tickets")
 	public ResponseEntity<List<TicketResponse>> getAllTickets(@AuthenticationPrincipal Auth auth) {
 		List<TicketResponse> ticketResponseList = ticketService.getAllTickets(auth);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(ticketResponseList);
 	}
 
 	@GetMapping("/v1/tickets/{ticketId}")
@@ -35,8 +36,17 @@ public class TicketController {
 	}
 
 	@PostMapping("/v1/tickets")
-	public ResponseEntity<?> createTicket(@AuthenticationPrincipal Auth auth,
+	public ResponseEntity<TicketResponse> createTicket(@AuthenticationPrincipal Auth auth,
 		@RequestBody TicketCreateRequest ticketCreateRequest) {
-		return ResponseEntity.ok().body(null);
+		TicketResponse ticketResponse = ticketService.createTicket(auth, ticketCreateRequest);
+		return ResponseEntity.ok().body(ticketResponse);
+	}
+
+	@DeleteMapping("/v1/tickets/{ticketId}")
+	public ResponseEntity<Void> deleteTicket(@AuthenticationPrincipal Auth auth,
+		@PathVariable Long ticketId) {
+		ticketService.deleteTicket(auth, ticketId);
+
+		return ResponseEntity.noContent().build();
 	}
 }

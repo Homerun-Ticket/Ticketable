@@ -22,6 +22,7 @@ public enum ErrorCode {
 	// 티켓
 	TICKET_NOT_FOUND("해당하는 티켓을 찾을 수 없습니다.", BAD_REQUEST),
 	TICKET_PAYMENT_NOT_FOUND("티켓 결제 내역이 존재하지않습니다.", BAD_REQUEST),
+	TICKET_ALREADY_RESERVED("이미 예매된 좌석입니다.", HttpStatus.CONFLICT),
 	// 경매
 	
 	// 포인트

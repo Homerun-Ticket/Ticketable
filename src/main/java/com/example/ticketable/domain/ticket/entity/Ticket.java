@@ -41,4 +41,8 @@ public class Ticket {
 		this.member = member;
 		this.game = game;
 	}
+
+	public void delete() {
+		deletedAt = LocalDateTime.now();
+	}
 }
