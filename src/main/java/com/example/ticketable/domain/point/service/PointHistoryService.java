@@ -41,7 +41,7 @@ public class PointHistoryService {
 		Member member = memberRepository.findMemberById(authId)
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 		
-		Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+		Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
 		
 		Page<PointHistory> points = pointHistoryRepository.findAllByMemberId(member.getId(), pageable);
 		
