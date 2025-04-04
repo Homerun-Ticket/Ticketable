@@ -5,12 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SQLRestriction("deleted_at is null")
 public class Seat {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +35,13 @@ public class Seat {
 		this.isBlind = isBlind;
 		this.section = section;
 		this.deletedAt = null;
+	}
+
+	public void updateBlind() {
+		this.isBlind = !isBlind;
+	}
+
+	public void delete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 }

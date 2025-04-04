@@ -5,12 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SQLRestriction("deleted_at is null")
 public class Stadium {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,5 +51,9 @@ public class Stadium {
 
 	public void updateImagePath(String imagePath) {
 		this.imagePath = imagePath;
+	}
+
+	public void updateCapacity(int sum) {
+		this.capacity = capacity + sum;
 	}
 }

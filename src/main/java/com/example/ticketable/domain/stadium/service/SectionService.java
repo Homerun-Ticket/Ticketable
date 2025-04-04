@@ -5,6 +5,7 @@ import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.stadium.dto.request.SectionCreateRequest;
 import com.example.ticketable.domain.stadium.dto.request.SectionUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SectionCreateResponse;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionUpdateResponse;
 import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
@@ -12,6 +13,9 @@ import com.example.ticketable.domain.stadium.repository.SectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.Server;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,7 @@ public class SectionService {
 
     private final StadiumService stadiumService;
 
+    @Transactional
     public SectionCreateResponse createSection(Long stadiumId, SectionCreateRequest request) {
         Stadium stadium = stadiumService.getStadium(stadiumId);
 
@@ -34,6 +39,7 @@ public class SectionService {
         return SectionCreateResponse.of(section);
     }
 
+    @Transactional
     public SectionUpdateResponse updateSection(Long sectionId, SectionUpdateRequest request) {
         Section section = sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
 
@@ -44,13 +50,17 @@ public class SectionService {
         return SectionUpdateResponse.of(section);
     }
 
+    @Transactional
     public void delete(Long sectionId) {
         Section section = sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
-
         section.delete();
     }
 
     public Section getById(Long sectionId) {
         return sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
+    }
+
+    public List<SectionSeatCountResponse> getAvailableSeatsBySectionCode(Long stadiumId, String type) {
+        return sectionRepository.findSectionSeatCountsBySectionId(stadiumId, type);
     }
 }

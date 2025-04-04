@@ -3,11 +3,14 @@ package com.example.ticketable.domain.stadium.controller;
 import com.example.ticketable.domain.stadium.dto.request.SectionCreateRequest;
 import com.example.ticketable.domain.stadium.dto.request.SectionUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SectionCreateResponse;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionUpdateResponse;
 import com.example.ticketable.domain.stadium.service.SectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +24,14 @@ public class SectionController {
             @RequestBody SectionCreateRequest request
     ) {
         return ResponseEntity.ok(sectionService.createSection(stadiumId, request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionCode(
+            @PathVariable Long stadiumId,
+            @RequestParam String type
+    ) {
+        return ResponseEntity.ok(sectionService.getAvailableSeatsBySectionCode(stadiumId, type));
     }
 
     @PutMapping("/{sectionId}")

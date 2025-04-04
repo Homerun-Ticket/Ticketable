@@ -1,8 +1,10 @@
 package com.example.ticketable.domain.stadium.controller;
 
 import com.example.ticketable.domain.stadium.dto.request.SeatCreateRequest;
+import com.example.ticketable.domain.stadium.dto.request.SeatUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SeatCreateResponse;
 import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
+import com.example.ticketable.domain.stadium.dto.response.SeatUpdateResponse;
 import com.example.ticketable.domain.stadium.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,11 @@ public class SeatController {
 
     @PostMapping
     public ResponseEntity<List<SeatCreateResponse>> createSeats(
-        @PathVariable Long sectionId,
-        @RequestBody SeatCreateRequest request
+            @PathVariable Long stadiumId,
+            @PathVariable Long sectionId,
+            @RequestBody SeatCreateRequest request
     ) {
-        return ResponseEntity.ok(seatService.createSeats(sectionId, request));
+        return ResponseEntity.ok(seatService.createSeats(stadiumId, sectionId, request));
     }
 
     @GetMapping
@@ -32,4 +35,19 @@ public class SeatController {
         return ResponseEntity.ok(seatService.getSeats(sectionId));
     }
 
+    @PutMapping("/{seatId}")
+    public ResponseEntity<SeatUpdateResponse> updateSeat(
+            @PathVariable Long seatId,
+            @RequestBody SeatUpdateRequest request
+    ) {
+        return ResponseEntity.ok(seatService.updateSeat(seatId, request));
+    }
+
+    @DeleteMapping("/{seatId}")
+    public ResponseEntity<Void> deleteSeat(
+            @PathVariable Long seatId
+    ) {
+        seatService.delete(seatId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -3,13 +3,17 @@ package com.example.ticketable.domain.stadium.service;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.stadium.dto.request.SeatCreateRequest;
+import com.example.ticketable.domain.stadium.dto.request.SeatUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SeatCreateResponse;
 import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
+import com.example.ticketable.domain.stadium.dto.response.SeatUpdateResponse;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.stadium.entity.Section;
+import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,8 +29,16 @@ public class SeatService {
 
     private final SectionService sectionService;
 
-    public List<SeatCreateResponse> createSeats(Long sectionId, SeatCreateRequest request) {
+    private final StadiumService stadiumService;
+
+    @Transactional
+    public List<SeatCreateResponse> createSeats(Long stadiumId, Long sectionId, SeatCreateRequest request) {
+        Stadium stadium = stadiumService.getStadium(stadiumId);
         Section section = sectionService.getById(sectionId);
+
+        if (seatRepository.existsBySectionId(sectionId)){
+            throw new ServerException(ErrorCode.SEATS_ALREADY_EXISTS);
+        }
 
         List<List<String>> colNums = request.getColNums();
         List<List<Boolean>> isBlind = request.getIsBlind();;
@@ -40,19 +52,23 @@ public class SeatService {
                 throw new ServerException(ErrorCode.COLUMN_NUMS_AND_BLIND_STATUS_NOT_SAME_SIZE);
             }
         }
+
+        int sum = 0;
         List<SeatCreateResponse> seatList = new ArrayList<>();
-        for (int i = 1; i <= colNums.size(); i++) {
-            for (int j = 0; j < colNums.get(i-1).size(); j++) {
+        for (int i = 0; i < colNums.size(); i++) {
+            for (int j = 0; j < colNums.get(i).size(); j++) {
                 Seat seat = seatRepository.save(
                         Seat.builder()
-                                .position(i+"열 "+ colNums.get(i-1).get(j))
-                                .isBlind(isBlind.get(i-1).get(j))
+                                .position(i+1+"열 "+ colNums.get(i).get(j))
+                                .isBlind(isBlind.get(i).get(j))
                                 .section(section)
                                 .build()
                 );
+                sum++;
                 seatList.add(SeatCreateResponse.of(seat));
             }
         }
+        stadium.updateCapacity(sum);
         return seatList;
     }
 
@@ -73,6 +89,26 @@ public class SeatService {
         }
         return responseList;
     }
+
+    @Transactional
+    public SeatUpdateResponse updateSeat(Long seatId, SeatUpdateRequest request) {
+        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new ServerException(ErrorCode.SEAT_NOT_FOUND));
+
+        if (seat.isBlind() == request.isBlind()){
+            throw new ServerException(ErrorCode.BLIND_STATUS_ALREADY_SET);
+        }
+        seat.updateBlind();
+
+        return SeatUpdateResponse.of(seat);
+    }
+
+    @Transactional
+    public void delete(Long seatId) {
+        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new ServerException(ErrorCode.SEAT_NOT_FOUND));
+
+        seat.delete();
+    }
+
 
     // PRICE
 }
