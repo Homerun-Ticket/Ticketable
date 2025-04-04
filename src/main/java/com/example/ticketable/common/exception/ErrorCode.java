@@ -17,9 +17,11 @@ public enum ErrorCode {
 
     // 경매
     AUCTION_DUPLICATION("이미 경매에 등록한 티켓입니다.", CONFLICT),
-    AUCTION_ACCESS_DENIED("티켓의 소유자가 아닙니다.", FORBIDDEN),
+    AUCTION_ACCESS_DENIED("경매에 대한 권한이 없습니다.", FORBIDDEN),
     AUCTION_TIME_OVER("경매 시간이 지났습니다.", BAD_REQUEST),
     AUCTION_NOT_FOUND("경매를 찾을 수 없습니다", NOT_FOUND),
+	INVALID_BIDDING_AMOUNT("입찰액이 잘못되었습니다.", BAD_REQUEST),
+
 
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),

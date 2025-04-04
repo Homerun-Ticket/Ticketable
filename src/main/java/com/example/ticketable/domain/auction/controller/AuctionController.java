@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.ticketable.common.entity.Auth;
+import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
 import com.example.ticketable.domain.auction.dto.request.AuctionCreateRequest;
 import com.example.ticketable.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.ticketable.domain.auction.dto.response.AuctionResponse;
@@ -50,6 +52,15 @@ public class AuctionController {
 		@PageableDefault(page = 1, size = 10) Pageable pageRequest
 	) {
 		return ResponseEntity.ok(auctionService.getAuctions(dto, convertPageable(pageRequest)));
+	}
+
+	@PostMapping("/{auctionId}")
+	public ResponseEntity<AuctionResponse> bidAuction(
+		@AuthenticationPrincipal Auth auth,
+		@PathVariable Long auctionId,
+		@RequestBody AuctionBidRequest dto
+	) {
+		return ResponseEntity.ok(auctionService.bidAuction(auth, auctionId, dto));
 	}
 
 }

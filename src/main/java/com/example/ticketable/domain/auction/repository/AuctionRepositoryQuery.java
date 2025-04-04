@@ -13,6 +13,5 @@ import com.example.ticketable.domain.ticket.entity.Ticket;
 
 public interface AuctionRepositoryQuery {
 	AuctionTicketInfoDto findTicketInfo(Ticket ticket);
-	Optional<Auction> findAuctionById(Long id);
 	Page<AuctionResponse> findAuctionsByConditions(AuctionSearchCondition dto, Pageable pageable);
 }

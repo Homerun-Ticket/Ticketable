@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import com.example.ticketable.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.ticketable.domain.auction.dto.response.AuctionResponse;
 
-import com.example.ticketable.domain.auction.entity.Auction;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.querydsl.core.types.Projections;
@@ -69,18 +68,6 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 		}
 
 		return AuctionTicketInfoDto.of(standardPoint, sectionInfo, seatInfo, seatCount, isTogether);
-	}
-
-	@Override
-	public Optional<Auction> findAuctionById(Long id) {
-		return Optional.ofNullable(
-			jpaQueryFactory
-				.select(auction)
-				.from(auction)
-				.join(auction.auctionTicketInfo, auctionTicketInfo)
-				.where(auction.id.eq(id))
-				.fetchOne()
-		);
 	}
 
 	@Override
