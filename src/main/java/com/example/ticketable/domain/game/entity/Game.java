@@ -1,6 +1,7 @@
 package com.example.ticketable.domain.game.entity;
 
 import com.example.ticketable.domain.game.enums.GameType;
+import com.example.ticketable.domain.stadium.entity.Stadium;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,6 +27,10 @@ public class Game {
 	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
 	private GameType type;
+
+	@ManyToOne
+	@JoinColumn(name = "stadium_id")
+	private Stadium stadium;
 	
 	private Integer point;
 
