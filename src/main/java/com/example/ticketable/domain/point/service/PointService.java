@@ -48,6 +48,9 @@ public class PointService {
 		return PointResponse.of(point);
 	}
 	
+	/**
+	 * 경매, 티켓 예매, 포인트 충전, 환불 등에서 사용될 포인트 증감 메서드
+	 */
 	@Transactional
 	public void increaseDecreasePoint(Long authId, Integer charge, PointHistoryType type) {
 		Member member = getMember(authId);
