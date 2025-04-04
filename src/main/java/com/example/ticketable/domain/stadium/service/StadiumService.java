@@ -36,7 +36,7 @@ public class StadiumService {
 
 
     public StadiumGetResponse getStadiumDto(Long stadiumId) {
-        Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
+        Stadium stadium = getStadium(stadiumId);
         List<SectionTypeSeatCountResponse> sectionSeatCounts = stadiumRepository.findSectionTypeAndSeatCountsByStadiumId(stadiumId);
 
         return StadiumGetResponse.of(stadium, sectionSeatCounts);
@@ -44,7 +44,7 @@ public class StadiumService {
 
     @Transactional
     public StadiumUpdateResponse updateStadium(Long stadiumId, StadiumUpdateRequest request) {
-        Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
+        Stadium stadium = getStadium(stadiumId);
 
         stadium.updateName(request.getName());
         stadium.updateImagePath("새로운 이미지 경로");
@@ -54,7 +54,7 @@ public class StadiumService {
 
     @Transactional
     public void deleteStadium(Long stadiumId) {
-        Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
+        Stadium stadium = getStadium(stadiumId);
         stadium.delete();
     }
 

@@ -41,7 +41,7 @@ public class SectionService {
 
     @Transactional
     public SectionUpdateResponse updateSection(Long sectionId, SectionUpdateRequest request) {
-        Section section = sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
+        Section section = getById(sectionId);
 
         section.updateType(request.getType());
         section.updateCode(request.getCode());
@@ -52,7 +52,7 @@ public class SectionService {
 
     @Transactional
     public void delete(Long sectionId) {
-        Section section = sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
+        Section section = getById(sectionId);
         section.delete();
     }
 
