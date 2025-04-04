@@ -20,6 +20,9 @@ public enum ErrorCode {
 	SEATS_ALREADY_EXISTS("이미 구역에 좌석이 있습니다.", BAD_REQUEST),
 
 	// 티켓
+	TICKET_NOT_FOUND("해당하는 티켓을 찾을 수 없습니다.", BAD_REQUEST),
+	TICKET_PAYMENT_NOT_FOUND("티켓 결제 내역이 존재하지않습니다.", BAD_REQUEST),
+	TICKET_ALREADY_RESERVED("이미 예매된 좌석입니다.", HttpStatus.CONFLICT),
 
 	// 경매
 	AUCTION_DUPLICATION("이미 경매에 등록한 티켓입니다.", CONFLICT),

@@ -173,7 +173,6 @@ public class AuctionService {
 			}
 			pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
 		}
-
 		auctionRepository.saveAll(expiredAuctions);
 	}
 }
