@@ -15,8 +15,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -42,7 +40,7 @@ public class Ticket {
 		this.game = game;
 	}
 
-	public void delete() {
+	public void cancel() {
 		deletedAt = LocalDateTime.now();
 	}
 }
