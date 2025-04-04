@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/members")
+@RequestMapping("/api")
 public class MemberController {
 	
 	private final MemberService memberService;
 	
-	@PatchMapping
+	@PatchMapping("/v1/members")
 	public ResponseEntity<String> updatePassword(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody UpdatePasswordRequest request
@@ -26,7 +26,7 @@ public class MemberController {
 		return ResponseEntity.ok("비밀번호가 변경되었습니다.");
 	}
 	
-	@DeleteMapping
+	@DeleteMapping("/v1/members")
 	public ResponseEntity<String> deleteMember(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody DeleteMemberRequest request
