@@ -32,4 +32,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 		+ "  WHERE t.game.id = :gameId "
 		+ "    AND t.deletedAt is null ")
 	List<Ticket> findAllByGameId(Long gameId);
+
+	@Query("SELECT t "
+		+ "   FROM Ticket t JOIN FETCH t.member JOIN FETCH t.game "
+		+ "  WHERE t.id = :id "
+		+ "    AND t.deletedAt is null ")
+	Optional<Ticket>findByIdWithGameAndMember(Long id);
 }
