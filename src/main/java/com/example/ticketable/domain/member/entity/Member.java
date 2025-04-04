@@ -46,4 +46,12 @@ public class Member extends Timestamped {
 	public void changePassword(String password) {
 		this.password = password;
 	}
+	
+	private Member(Long id) {
+		this.id = id;
+	}
+	
+	public static Member fromAuth(Long authId) {
+		return new Member(authId);
+	}
 }
