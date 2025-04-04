@@ -1,11 +1,14 @@
 package com.example.ticketable.domain.point.entity;
 
+import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static com.example.ticketable.common.exception.ErrorCode.NOT_ENOUGH_POINT;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -28,11 +31,14 @@ public class Point {
 		this.member = member;
 	}
 	
-	public void increasePoint(Integer charge) {
+	public void plusPoint(Integer charge) {
 		this.point += charge;
 	}
 	
-	public void decreasePoint(Integer charge) {
+	public void minusPoint(Integer charge) {
+		if ((this.point - charge) < 0) {
+			throw new ServerException(NOT_ENOUGH_POINT);
+		}
 		this.point -= charge;
 	}
 }
