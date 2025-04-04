@@ -5,8 +5,10 @@ import static com.example.ticketable.common.util.Util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,13 +27,13 @@ import com.example.ticketable.domain.auction.service.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController("/api/v1/auctions")
+@RestController("/api")
 @RequiredArgsConstructor
 public class AuctionController {
 
 	private final AuctionService auctionService;
 
-	@PostMapping
+	@PostMapping("/v1/auctions")
 	public ResponseEntity<AuctionResponse> createAuction(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody AuctionCreateRequest dto
@@ -39,28 +41,35 @@ public class AuctionController {
 		return ResponseEntity.ok(auctionService.createAuction(auth, dto));
 	}
 
-	@GetMapping("/{auctionId}")
-	public ResponseEntity<AuctionResponse> getAuction(
-		@PathVariable Long auctionId
-	) {
+	@GetMapping("/v1/auctions/{auctionId}")
+	public ResponseEntity<AuctionResponse> getAuction(@PathVariable Long auctionId) {
 		return ResponseEntity.ok(auctionService.getAuction(auctionId));
 	}
 
-	@GetMapping
-	public ResponseEntity<Page<AuctionResponse>> getAuctions(
-		@ModelAttribute AuctionSearchCondition dto,
+	@GetMapping("/v1/auctions")
+	public ResponseEntity<PagedModel<AuctionResponse>> getAuctions(
+		@Valid @ModelAttribute AuctionSearchCondition dto,
 		@PageableDefault(page = 1, size = 10) Pageable pageRequest
 	) {
 		return ResponseEntity.ok(auctionService.getAuctions(dto, convertPageable(pageRequest)));
 	}
 
-	@PostMapping("/{auctionId}")
+	@PostMapping("/v1/auctions/{auctionId}")
 	public ResponseEntity<AuctionResponse> bidAuction(
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long auctionId,
-		@RequestBody AuctionBidRequest dto
+		@Valid @RequestBody AuctionBidRequest dto
 	) {
 		return ResponseEntity.ok(auctionService.bidAuction(auth, auctionId, dto));
+	}
+
+	@DeleteMapping("/v1/auctions/{auctionId}")
+	public ResponseEntity<Void> deleteAuction(
+		@AuthenticationPrincipal Auth auth,
+		@PathVariable Long auctionId
+	) {
+		auctionService.deleteAuction(auth, auctionId);
+		return ResponseEntity.ok().build();
 	}
 
 }

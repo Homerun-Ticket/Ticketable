@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.auction.entity;
 
+import com.example.ticketable.common.entity.Timestamped;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 
@@ -19,7 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-public class Auction {
+public class Auction extends Timestamped {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,16 +45,6 @@ public class Auction {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "bidder_id")
 	private Member bidder;
-
-	@CreatedDate
-	@Column(updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	private LocalDateTime createdAt;
-
-	@LastModifiedDate
-	@Column
-	@Temporal(TemporalType.TIMESTAMP)
-	private LocalDateTime updatedAt;
 
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)

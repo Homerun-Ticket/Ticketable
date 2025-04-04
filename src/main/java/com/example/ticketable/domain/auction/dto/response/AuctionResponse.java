@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import com.example.ticketable.domain.auction.entity.Auction;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Getter
 public class AuctionResponse {
 
