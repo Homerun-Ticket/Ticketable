@@ -12,21 +12,21 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/stadiums")
+@RequestMapping("/api")
 public class StadiumController {
     private final StadiumService stadiumService;
 
-    @PostMapping
+    @PostMapping("/v1/stadiums")
     public ResponseEntity<StadiumCreateResponse> createStadium(@RequestBody StadiumCreateRequest request) {
         return ResponseEntity.ok(stadiumService.createStadium(request));
     }
 
-    @GetMapping("{stadiumId}")
+    @GetMapping("/v1/stadiums/{stadiumId}")
     public ResponseEntity<StadiumGetResponse> getStadium(@PathVariable Long stadiumId) {
         return ResponseEntity.ok(stadiumService.getStadiumDto(stadiumId));
     }
 
-    @PutMapping("{stadiumId}")
+    @PutMapping("/v1/stadiums/{stadiumId}")
     public ResponseEntity<StadiumUpdateResponse> updateStadium(
             @PathVariable Long stadiumId,
             @RequestBody StadiumUpdateRequest requset
@@ -34,7 +34,7 @@ public class StadiumController {
         return ResponseEntity.ok(stadiumService.updateStadium(stadiumId, requset));
     }
 
-    @DeleteMapping("{stadiumId}")
+    @DeleteMapping("/v1/stadiums/{stadiumId}")
     public ResponseEntity<Void> deleteStadium(@PathVariable Long stadiumId) {
         stadiumService.deleteStadium(stadiumId);
         return ResponseEntity.ok().build();

@@ -14,11 +14,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/stadiums/{stadiumId}/sections")
+@RequestMapping("/api")
 public class SectionController {
     private final SectionService sectionService;
 
-    @PostMapping
+    @PostMapping("/v1/stadiums/{stadiumId}/sections")
     public ResponseEntity<SectionCreateResponse> createSection(
             @PathVariable Long stadiumId,
             @RequestBody SectionCreateRequest request
@@ -26,7 +26,7 @@ public class SectionController {
         return ResponseEntity.ok(sectionService.createSection(stadiumId, request));
     }
 
-    @GetMapping
+    @GetMapping("/v1/stadiums/{stadiumId}/sections")
     public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionCode(
             @PathVariable Long stadiumId,
             @RequestParam String type
@@ -34,7 +34,7 @@ public class SectionController {
         return ResponseEntity.ok(sectionService.getAvailableSeatsBySectionCode(stadiumId, type));
     }
 
-    @PutMapping("/{sectionId}")
+    @PutMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}")
     public ResponseEntity<SectionUpdateResponse> updateSection(
             @PathVariable Long sectionId,
             @RequestBody SectionUpdateRequest request
@@ -43,7 +43,7 @@ public class SectionController {
     }
 
 
-    @DeleteMapping("/{sectionId}")
+    @DeleteMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}")
     public ResponseEntity<Void> deleteSection(
             @PathVariable Long sectionId
     ) {

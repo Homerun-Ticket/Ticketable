@@ -15,11 +15,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/stadiums/{stadiumId}/sections/{sectionId}/seats")
+@RequestMapping("/api")
 public class SeatController {
     private final SeatService seatService;
 
-    @PostMapping
+    @PostMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats")
     public ResponseEntity<List<SeatCreateResponse>> createSeats(
             @PathVariable Long stadiumId,
             @PathVariable Long sectionId,
@@ -28,14 +28,14 @@ public class SeatController {
         return ResponseEntity.ok(seatService.createSeats(stadiumId, sectionId, request));
     }
 
-    @GetMapping
+    @GetMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats")
     public ResponseEntity<List<SeatGetResponse>> getSeats(
             @PathVariable Long sectionId
     ) {
         return ResponseEntity.ok(seatService.getSeats(sectionId));
     }
 
-    @PutMapping("/{seatId}")
+    @PutMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats/{seatId}")
     public ResponseEntity<SeatUpdateResponse> updateSeat(
             @PathVariable Long seatId,
             @RequestBody SeatUpdateRequest request
@@ -43,7 +43,7 @@ public class SeatController {
         return ResponseEntity.ok(seatService.updateSeat(seatId, request));
     }
 
-    @DeleteMapping("/{seatId}")
+    @DeleteMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats/{seatId}")
     public ResponseEntity<Void> deleteSeat(
             @PathVariable Long seatId
     ) {

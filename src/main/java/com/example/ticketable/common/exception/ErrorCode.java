@@ -15,8 +15,8 @@ public enum ErrorCode {
 	STADIUM_NOT_FOUND("해당하는 경기장을 찾을 수 없습니다.", NOT_FOUND),
 	SECTION_NOT_FOUND("해당하는 구역을 찾을 수 없습니다.", NOT_FOUND),
 	SEAT_NOT_FOUND("해당하는 좌석을 찾을 수 없습니다.", NOT_FOUND),
-	COLUMN_NUMS_AND_BLIND_STATUS_NOT_SAME_SIZE("열 번호와 시야 방해 여부 리스트의 크기는 같아야 합니다.", HttpStatus.BAD_REQUEST),
-	BLIND_STATUS_ALREADY_SET("시야 방해석 상태가 이미 요청된 상태와 동일합니다.", HttpStatus.BAD_REQUEST),
+	COLUMN_NUMS_AND_BLIND_STATUS_NOT_SAME_SIZE("열 번호와 시야 방해 여부 리스트의 크기는 같아야 합니다.", BAD_REQUEST),
+	BLIND_STATUS_ALREADY_SET("시야 방해석 상태가 이미 요청된 상태와 동일합니다.", BAD_REQUEST),
 	SEATS_ALREADY_EXISTS("이미 구역에 좌석이 있습니다.", BAD_REQUEST),
 
 	// 티켓
