@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -25,6 +27,8 @@ public class Ticket {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "game_id", nullable = false)
 	private Game game;
+
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public Ticket(Member member, Game game) {
