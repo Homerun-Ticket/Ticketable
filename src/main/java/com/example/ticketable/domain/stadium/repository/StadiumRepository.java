@@ -21,4 +21,5 @@ public interface StadiumRepository extends JpaRepository<Stadium, Long> {
             "GROUP BY sn.type")
     List<SectionTypeSeatCountResponse> findSectionTypeAndSeatCountsByStadiumId(@Param("stadiumId") Long stadiumId);
 
+    boolean existsByName(String name);
 }

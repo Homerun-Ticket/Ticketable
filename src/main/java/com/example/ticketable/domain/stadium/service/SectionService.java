@@ -28,6 +28,10 @@ public class SectionService {
     public SectionCreateResponse createSection(Long stadiumId, SectionCreateRequest request) {
         Stadium stadium = stadiumService.getStadium(stadiumId);
 
+        if(sectionRepository.existsByCodeAndStadium(request.getCode(), stadium)){
+            throw new ServerException(ErrorCode.SECTION_CODE_DUPLICATION);
+        }
+
         Section section = sectionRepository.save(
                 Section.builder()
                         .type(request.getType())
@@ -42,6 +46,10 @@ public class SectionService {
     @Transactional
     public SectionUpdateResponse updateSection(Long sectionId, SectionUpdateRequest request) {
         Section section = getById(sectionId);
+
+        if(sectionRepository.existsByCodeAndStadium(request.getCode(), section.getStadium())) {
+            throw new ServerException(ErrorCode.SECTION_CODE_DUPLICATION);
+        }
 
         section.updateType(request.getType());
         section.updateCode(request.getCode());

@@ -23,6 +23,9 @@ public class StadiumService {
 
     @Transactional
     public StadiumCreateResponse createStadium(StadiumCreateRequest request) {
+        if(stadiumRepository.existsByName(request.getName())){
+            throw new ServerException(ErrorCode.STADIUM_NAME_DUPLICATION);
+        }
         Stadium stadium = stadiumRepository.save(
                 Stadium.builder()
                         .name(request.getName())
@@ -45,6 +48,10 @@ public class StadiumService {
     @Transactional
     public StadiumUpdateResponse updateStadium(Long stadiumId, StadiumUpdateRequest request) {
         Stadium stadium = getStadium(stadiumId);
+
+        if(stadiumRepository.existsByName(request.getName())){
+            throw new ServerException(ErrorCode.STADIUM_NAME_DUPLICATION);
+        }
 
         stadium.updateName(request.getName());
         stadium.updateImagePath("새로운 이미지 경로");

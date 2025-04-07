@@ -4,6 +4,7 @@ package com.example.ticketable.domain.stadium.repository;
 import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse;
 import com.example.ticketable.domain.stadium.entity.Section;
+import com.example.ticketable.domain.stadium.entity.Stadium;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +24,7 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
             "HAVING sn.type = :type"
         )
         List<SectionSeatCountResponse> findSectionSeatCountsBySectionId(@Param("stadiumId") Long stadiumId, @Param("type") String type);
+
+    boolean existsByCodeAndStadium(String code, Stadium stadium);
 }
 
