@@ -6,6 +6,7 @@ import static com.example.ticketable.domain.member.role.MemberRole.ROLE_MEMBER;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.service.GameService;
 import com.example.ticketable.domain.member.entity.Member;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class TicketService {
 	private final GameService gameService;
 	private final TicketPriceCalculator ticketPriceCalculator;
 	private final TicketCreateService ticketCreateService;
+	private final SeatHoldRedisUtil seatHoldRedisUtil;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
@@ -96,11 +99,27 @@ public class TicketService {
 		try {
 			ticketPaymentService.paymentTicket(ticketContext);
 			return ticketContext.toResponse();
-		} catch (Exception e) {
+		} catch (ServerException e) {
+			log.error(e.getMessage());
 			ticketCreateService.rollBackTicket(ticketContext.getTicket());
 			throw new ServerException(USER_ACCESS_DENIED);
 		}
 
+	}
+
+	public TicketResponse reservationTicketV3(Auth auth, TicketCreateRequest ticketCreateRequest) {
+		TicketContext ticketContext = ticketCreateService.createTicketV2(auth, ticketCreateRequest);
+		try {
+			ticketPaymentService.paymentTicket(ticketContext);
+			return ticketContext.toResponse();
+		} catch (ServerException e) {
+			log.error(e.getMessage());
+			ticketCreateService.rollBackTicket(ticketContext.getTicket());
+			throw new ServerException(USER_ACCESS_DENIED);
+		} finally {
+			log.info("auth id : {}", auth.getId());
+			seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
+		}
 	}
 
 	@Transactional

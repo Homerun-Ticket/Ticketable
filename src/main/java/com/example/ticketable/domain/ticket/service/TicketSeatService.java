@@ -25,7 +25,7 @@ public class TicketSeatService {
 	}
 
 	public void checkDuplicateSeats(List<Long> seatIds, Long gameId) {
-		if(!ticketSeatRepository.findAllByGameIdAndSeatIdInAndTicketDeletedAtIsNull(gameId, seatIds).isEmpty()) {
+		if(ticketSeatRepository.existsByGameIdAndSeatIdInAndTicketDeletedAtIsNull(gameId, seatIds)) {
 			log.debug("이미 예매된 좌석입니다.");
 			throw new ServerException(TICKET_ALREADY_RESERVED);
 		}

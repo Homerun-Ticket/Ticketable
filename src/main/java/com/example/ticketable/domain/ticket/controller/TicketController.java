@@ -38,7 +38,21 @@ public class TicketController {
 	@PostMapping("/v1/tickets")
 	public ResponseEntity<TicketResponse> createTicket(@AuthenticationPrincipal Auth auth,
 		@RequestBody TicketCreateRequest ticketCreateRequest) {
+		TicketResponse ticketResponse = ticketService.reservationTicket(auth, ticketCreateRequest);
+		return ResponseEntity.ok().body(ticketResponse);
+	}
+
+	@PostMapping("/v2/tickets")
+	public ResponseEntity<TicketResponse> createTicketV2(@AuthenticationPrincipal Auth auth,
+		@RequestBody TicketCreateRequest ticketCreateRequest) {
 		TicketResponse ticketResponse = ticketService.reservationTicketV2(auth, ticketCreateRequest);
+		return ResponseEntity.ok().body(ticketResponse);
+	}
+
+	@PostMapping("/v3/tickets")
+	public ResponseEntity<TicketResponse> createTicketV3(@AuthenticationPrincipal Auth auth,
+		@RequestBody TicketCreateRequest ticketCreateRequest) {
+		TicketResponse ticketResponse = ticketService.reservationTicketV3(auth, ticketCreateRequest);
 		return ResponseEntity.ok().body(ticketResponse);
 	}
 
