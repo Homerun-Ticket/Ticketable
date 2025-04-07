@@ -15,6 +15,7 @@ import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountRe
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.service.StadiumService;
+import com.example.ticketable.domain.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import static com.example.ticketable.common.exception.ErrorCode.USER_ACCESS_DENIED;
 
