@@ -24,6 +24,7 @@ import com.example.ticketable.domain.auction.dto.response.AuctionResponse;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,20 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 
 	@Override
 	public PagedModel<AuctionResponse> findByConditions(AuctionSearchCondition dto, Pageable pageable) {
+		BooleanExpression homeEq = dto.getHome() != null ? auction.ticket.game.home.eq(dto.getHome()) : null;
+		BooleanExpression awayEq = dto.getAway() != null ? auction.ticket.game.away.eq(dto.getAway()) : null;
+		BooleanExpression startTimeBetween = dto.getStartTime() != null
+			? auction.ticket.game.startTime.between(
+			dto.getStartTime().toLocalDate().atStartOfDay(),
+			dto.getStartTime().toLocalDate().atStartOfDay().plusDays(1).minusSeconds(1)
+		)
+			: null;
+		BooleanExpression seatCountEq =
+			dto.getSeatCount() != null ? auctionTicketInfo.seatCount.eq(dto.getSeatCount()) : null;
+		BooleanExpression isTogether = dto.getIsTogether()
+			? auctionTicketInfo.isTogether.isTrue()
+			: auctionTicketInfo.isTogether.isFalse();
+
 		List<AuctionResponse> results = jpaQueryFactory
 			.select(
 				Projections.constructor(AuctionResponse.class,
@@ -89,25 +104,14 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 					game.home,
 					game.away,
 					game.type.stringValue(),
-					auction.createdAt,
-					auction.updatedAt,
-					auction.deletedAt
+					auction.createdAt
 				)
 			)
 			.from(auction)
 			.join(auction.ticket, ticket)
 			.join(ticket.game, game)
 			.join(auction.auctionTicketInfo, auctionTicketInfo)
-			.where(
-				dto.getHome() != null ? auction.ticket.game.home.eq(dto.getHome()) : null,
-				dto.getAway() != null ? auction.ticket.game.away.eq(dto.getAway()) : null,
-				dto.getStartTime() != null ? auction.ticket.game.startTime.between(
-					dto.getStartTime().toLocalDate().atStartOfDay(),
-					dto.getStartTime().toLocalDate().atStartOfDay().plusDays(1).minusSeconds(1)
-				) : null,
-				dto.getSeatCount() != null ? auctionTicketInfo.seatCount.eq(dto.getSeatCount()) : null,
-				dto.getIsTogether() ? auctionTicketInfo.isTogether.isTrue() : auctionTicketInfo.isTogether.isFalse()
-			)
+			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether)
 			.offset(pageable.getPageNumber())
 			.limit(pageable.getPageSize())
 			.orderBy(auction.createdAt.asc())
@@ -116,16 +120,7 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 		Long total = jpaQueryFactory
 			.select(auction.countDistinct())
 			.from(auction)
-			.where(
-				dto.getHome() != null ? auction.ticket.game.home.eq(dto.getHome()) : null,
-				dto.getAway() != null ? auction.ticket.game.away.eq(dto.getAway()) : null,
-				dto.getStartTime() != null ? auction.ticket.game.startTime.between(
-					dto.getStartTime().toLocalDate().atStartOfDay(),
-					dto.getStartTime().toLocalDate().atStartOfDay().plusDays(1).minusSeconds(1)
-				) : null,
-				dto.getSeatCount() != null ? auctionTicketInfo.seatCount.eq(dto.getSeatCount()) : null,
-				dto.getIsTogether() ? auctionTicketInfo.isTogether.isTrue() : auctionTicketInfo.isTogether.isFalse()
-			)
+			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether)
 			.fetchOne();
 
 		PageImpl<AuctionResponse> auctionResponses = new PageImpl<>(results, pageable, total != null ? total : 0L);

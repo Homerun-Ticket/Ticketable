@@ -38,6 +38,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuctionService {
 
+	private static final int BID_UNIT = 100;
+
 	private final MemberRepository memberRepository;
 	private final TicketRepository ticketRepository;
 	private final AuctionRepository auctionRepository;
@@ -99,20 +101,13 @@ public class AuctionService {
 
 	@Transactional
 	public AuctionResponse bidAuction(Auth auth, Long auctionId, AuctionBidRequest dto) {
+
+		pointService.decreasePoint(auth.getId(), dto.getBidPoint(), PointHistoryType.BID);
+
 		Auction auction = findAuction(auctionId);
 
 		if (auction.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now())) {
 			throw new ServerException(AUCTION_TIME_OVER);
-		}
-
-		if (auction.getBidPoint() == null) {
-			if (dto.getBidPoint() % 100 > 0 || auction.getStartPoint() + 100 > dto.getBidPoint()) {
-				throw new ServerException(INVALID_BIDDING_AMOUNT);
-			}
-		} else {
-			if (dto.getBidPoint() % 100 > 0 || auction.getBidPoint() + 100 > dto.getBidPoint()) {
-				throw new ServerException(INVALID_BIDDING_AMOUNT);
-			}
 		}
 
 		Member bidder = findMember(auth);
@@ -133,9 +128,7 @@ public class AuctionService {
 			pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
 		}
 
-		auction.updateBid(bidder, dto.getBidPoint());
-
-		pointService.decreasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID);
+		auction.updateBid(bidder, dto.getBidPoint() + BID_UNIT);
 
 		return AuctionResponse.of(auction);
 	}
@@ -154,7 +147,7 @@ public class AuctionService {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
-		auctionRepository.delete(auction);
+		auction.setDeletedAt();
 	}
 
 	private Auction findAuction(Long auctionId) {
@@ -172,26 +165,51 @@ public class AuctionService {
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 	}
 
+	/*
+	 * 경기 취소 시 로직
+	 * 최종 낙찰자에 대한 포인트 환불 + 티켓을 구매했던 사람으로 소유자 변경
+	 */
+	@Transactional
+	public void deleteAllAuctionsByCanceledGame(Long gameId) {
+		List<Auction> auctions = auctionRepository.findAllByTicketGameIdAndDeletedAtIsNull(gameId);
+
+		if (auctions.isEmpty()) {
+			return;
+		}
+
+		for (Auction auction : auctions) {
+			auction.setDeletedAt(); // 경매 종료 처리
+
+			// 낙찰자 환불
+			if (auction.getBidder() != null) {
+				pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
+			}
+
+			// 티켓 소유권 되돌리기
+			auction.getTicket().changeOwner(auction.getSeller());
+		}
+	}
+
 	@Scheduled(fixedRate = 60000) // 1분마다 실행
 	@Transactional
 	public void closeExpiredAuctions() {
-		LocalDateTime standardTime = LocalDateTime.now().minusMinutes(1);
+		LocalDateTime standardTime = LocalDateTime.now().minusHours(24);
 
 		List<Auction> expiredAuctions = auctionRepository.findAllByCreatedAtBetweenAndDeletedAtIsNull(
 			standardTime.minusMinutes(60), standardTime
 		);
 
-		if (!expiredAuctions.isEmpty()) {
-			for (Auction auction : expiredAuctions) {
-				auction.setDeletedAt();
+		if (expiredAuctions.isEmpty()) {
+			return;
+		}
 
-				if (auction.getBidder() != null) {
-					pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
-					auction.getTicket().changeOwner(auction.getBidder());
-				}
+		for (Auction auction : expiredAuctions) {
+			auction.setDeletedAt();
+
+			if (auction.getBidder() != null) {
+				pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
+				auction.getTicket().changeOwner(auction.getBidder());
 			}
-
-			auctionRepository.saveAll(expiredAuctions);
 		}
 	}
 }

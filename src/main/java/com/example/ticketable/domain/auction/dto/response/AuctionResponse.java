@@ -37,9 +37,6 @@ public class AuctionResponse {
 
 	private final LocalDateTime createdAt;
 
-	private final LocalDateTime updatedAt;
-
-	private final LocalDateTime deletedAt;
 
 	public static AuctionResponse of(Auction auction) {
 		return new AuctionResponse(
@@ -55,9 +52,7 @@ public class AuctionResponse {
 			auction.getTicket().getGame().getHome(),
 			auction.getTicket().getGame().getAway(),
 			auction.getTicket().getGame().getType().toString(),
-			auction.getCreatedAt(),
-			auction.getUpdatedAt(),
-			auction.getDeletedAt()
+			auction.getCreatedAt()
 		);
 	}
 }

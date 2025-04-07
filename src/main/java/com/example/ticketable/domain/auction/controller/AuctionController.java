@@ -1,6 +1,6 @@
 package com.example.ticketable.domain.auction.controller;
 
-import static com.example.ticketable.common.util.Util.*;
+import static com.example.ticketable.common.util.PageUtil.*;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -51,7 +51,7 @@ public class AuctionController {
 		@ModelAttribute AuctionSearchCondition dto,
 		@PageableDefault(page = 1, size = 10) Pageable pageRequest
 	) {
-		return ResponseEntity.ok(auctionService.getAuctions(dto, convertPageable(pageRequest)));
+		return ResponseEntity.ok(auctionService.getAuctions(dto, correctPageIndex(pageRequest)));
 	}
 
 	@PostMapping("/v1/auctions/{auctionId}")
