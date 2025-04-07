@@ -11,7 +11,6 @@ import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SectionRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.Server;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +27,10 @@ public class SectionService {
     public SectionCreateResponse createSection(Long stadiumId, SectionCreateRequest request) {
         Stadium stadium = stadiumService.getStadium(stadiumId);
 
+        if(sectionRepository.existsByCodeAndStadium(request.getCode(), stadium)){
+            throw new ServerException(ErrorCode.SECTION_CODE_DUPLICATION);
+        }
+
         Section section = sectionRepository.save(
                 Section.builder()
                         .type(request.getType())
@@ -42,6 +45,10 @@ public class SectionService {
     @Transactional
     public SectionUpdateResponse updateSection(Long sectionId, SectionUpdateRequest request) {
         Section section = getById(sectionId);
+
+        if(sectionRepository.existsByCodeAndStadium(request.getCode(), section.getStadium())) {
+            throw new ServerException(ErrorCode.SECTION_CODE_DUPLICATION);
+        }
 
         section.updateType(request.getType());
         section.updateCode(request.getCode());
@@ -58,9 +65,5 @@ public class SectionService {
 
     public Section getById(Long sectionId) {
         return sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
-    }
-
-    public List<SectionSeatCountResponse> getAvailableSeatsBySectionCode(Long stadiumId, String type) {
-        return sectionRepository.findSectionSeatCountsBySectionId(stadiumId, type);
     }
 }

@@ -23,6 +23,9 @@ public class StadiumService {
 
     @Transactional
     public StadiumCreateResponse createStadium(StadiumCreateRequest request) {
+        if(stadiumRepository.existsByName(request.getName())){
+            throw new ServerException(ErrorCode.STADIUM_NAME_DUPLICATION);
+        }
         Stadium stadium = stadiumRepository.save(
                 Stadium.builder()
                         .name(request.getName())
@@ -35,16 +38,13 @@ public class StadiumService {
     }
 
 
-    public StadiumGetResponse getStadiumDto(Long stadiumId) {
-        Stadium stadium = getStadium(stadiumId);
-        List<SectionTypeSeatCountResponse> sectionSeatCounts = stadiumRepository.findSectionTypeAndSeatCountsByStadiumId(stadiumId);
-
-        return StadiumGetResponse.of(stadium, sectionSeatCounts);
-    }
-
     @Transactional
     public StadiumUpdateResponse updateStadium(Long stadiumId, StadiumUpdateRequest request) {
         Stadium stadium = getStadium(stadiumId);
+
+        if(stadiumRepository.existsByName(request.getName())){
+            throw new ServerException(ErrorCode.STADIUM_NAME_DUPLICATION);
+        }
 
         stadium.updateName(request.getName());
         stadium.updateImagePath("새로운 이미지 경로");
@@ -61,4 +61,5 @@ public class StadiumService {
     public Stadium getStadium(Long stadiumId) {
          return stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
     }
+
 }
