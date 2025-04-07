@@ -21,11 +21,6 @@ public class StadiumController {
         return ResponseEntity.ok(stadiumService.createStadium(request));
     }
 
-    @GetMapping("/v1/stadiums/{stadiumId}")
-    public ResponseEntity<StadiumGetResponse> getStadium(@PathVariable Long stadiumId) {
-        return ResponseEntity.ok(stadiumService.getStadiumDto(stadiumId));
-    }
-
     @PutMapping("/v1/stadiums/{stadiumId}")
     public ResponseEntity<StadiumUpdateResponse> updateStadium(
             @PathVariable Long stadiumId,

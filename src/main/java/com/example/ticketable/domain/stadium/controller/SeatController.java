@@ -28,14 +28,7 @@ public class SeatController {
         return ResponseEntity.ok(seatService.createSeats(stadiumId, sectionId, request));
     }
 
-    @GetMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats")
-    public ResponseEntity<List<SeatGetResponse>> getSeats(
-            @PathVariable Long sectionId
-    ) {
-        return ResponseEntity.ok(seatService.getSeats(sectionId));
-    }
-
-    @PutMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats/{seatId}")
+    @PutMapping("/v1/seats/{seatId}")
     public ResponseEntity<SeatUpdateResponse> updateSeat(
             @PathVariable Long seatId,
             @RequestBody SeatUpdateRequest request
@@ -43,7 +36,7 @@ public class SeatController {
         return ResponseEntity.ok(seatService.updateSeat(seatId, request));
     }
 
-    @DeleteMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats/{seatId}")
+    @DeleteMapping("/v1/seats/{seatId}")
     public ResponseEntity<Void> deleteSeat(
             @PathVariable Long seatId
     ) {

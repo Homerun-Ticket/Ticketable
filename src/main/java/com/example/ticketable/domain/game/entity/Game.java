@@ -18,6 +18,10 @@ public class Game {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "stadium_id", nullable = false)
+	private Stadium stadium;
+
 	@Column(length = 50)
 	private String away;
 
@@ -34,14 +38,29 @@ public class Game {
 	
 	private Integer point;
 
+	private String imagePath;
+
 	private LocalDateTime startTime;
+
+	private LocalDateTime deletedAt;
 	
 	@Builder
-	public Game(String away, String home, GameType type, Integer point, LocalDateTime startTime) {
+	public Game(String away, Stadium stadium, String home, GameType type, Integer point, String imagePath, LocalDateTime startTime) {
+		this.stadium = stadium;
 		this.away = away;
 		this.home = home;
 		this.type = type;
 		this.point = point;
+		this.imagePath = imagePath;
+		this.startTime = startTime;
+		this.deletedAt = null;
+	}
+
+	public void cancel() {
+		deletedAt = LocalDateTime.now();
+	}
+
+	public void updateStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
 }
