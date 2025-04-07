@@ -11,7 +11,6 @@ import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SectionRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.Server;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,9 +65,5 @@ public class SectionService {
 
     public Section getById(Long sectionId) {
         return sectionRepository.findById(sectionId).orElseThrow(() -> new ServerException(ErrorCode.SECTION_NOT_FOUND));
-    }
-
-    public List<SectionSeatCountResponse> getAvailableSeatsBySectionCode(Long stadiumId, String type) {
-        return sectionRepository.findSectionSeatCountsBySectionId(stadiumId, type);
     }
 }

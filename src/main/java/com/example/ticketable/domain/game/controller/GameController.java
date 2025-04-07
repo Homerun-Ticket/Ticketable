@@ -6,6 +6,9 @@ import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
 import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.dto.response.GameUpdateResponse;
 import com.example.ticketable.domain.game.service.GameService;
+import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
+import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +33,29 @@ public class GameController {
             @RequestParam (required = false) LocalDateTime date
             ) {
         return ResponseEntity.ok(gameService.getGames(team, date));
+    }
+
+    @GetMapping("/v1/games/{gameId}")
+    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCounts(
+            @PathVariable Long gameId
+    ) {
+        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCounts(gameId));
+    }
+
+    @GetMapping("/v1/games/{gameId}/sectionTypes")
+    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionType(
+            @PathVariable Long gameId,
+            @RequestParam String type
+    ) {
+        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionType(gameId, type));
+    }
+
+    @GetMapping("/v1/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySection(
+            @PathVariable Long gameId,
+            @PathVariable Long sectionId
+    ) {
+        return ResponseEntity.ok(gameService.getSeatInfoBySection(sectionId, gameId));
     }
 
     @PutMapping("/v1/games/{gameId}")

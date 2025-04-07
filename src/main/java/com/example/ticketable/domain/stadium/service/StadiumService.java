@@ -38,13 +38,6 @@ public class StadiumService {
     }
 
 
-    public StadiumGetResponse getStadiumDto(Long stadiumId) {
-        Stadium stadium = getStadium(stadiumId);
-        List<SectionTypeSeatCountResponse> sectionSeatCounts = stadiumRepository.findSectionTypeAndSeatCountsByStadiumId(stadiumId);
-
-        return StadiumGetResponse.of(stadium, sectionSeatCounts);
-    }
-
     @Transactional
     public StadiumUpdateResponse updateStadium(Long stadiumId, StadiumUpdateRequest request) {
         Stadium stadium = getStadium(stadiumId);
@@ -68,4 +61,5 @@ public class StadiumService {
     public Stadium getStadium(Long stadiumId) {
          return stadiumRepository.findById(stadiumId).orElseThrow(()-> new ServerException(ErrorCode.STADIUM_NOT_FOUND));
     }
+
 }

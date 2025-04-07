@@ -72,24 +72,6 @@ public class SeatService {
         return seatList;
     }
 
-    public List<SeatGetResponse> getSeats(Long sectionId) {
-        List<Seat> seatList = seatRepository.findBySectionId(sectionId);
-        List<Seat> unbookSeatList = seatRepository.findUnbookSeatsBySectionId(sectionId);
-
-        Set<Long> unbookedSeatIds = new HashSet<>();
-        for (Seat seat : unbookSeatList) {
-                unbookedSeatIds.add(seat.getId());
-        }
-
-        List<SeatGetResponse> responseList = new ArrayList<>();
-        for (Seat seat : seatList) {
-            boolean isBooked = !unbookedSeatIds.contains(seat.getId());
-            SeatGetResponse response = SeatGetResponse.of(seat, isBooked);
-            responseList.add(response);
-        }
-        return responseList;
-    }
-
     @Transactional
     public SeatUpdateResponse updateSeat(Long seatId, SeatUpdateRequest request) {
         Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new ServerException(ErrorCode.SEAT_NOT_FOUND));

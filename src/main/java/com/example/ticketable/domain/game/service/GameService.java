@@ -9,6 +9,10 @@ import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.dto.response.GameUpdateResponse;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
+import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
+import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse;
+import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.service.StadiumService;
 import lombok.RequiredArgsConstructor;
@@ -57,10 +61,24 @@ public class GameService {
             games = gameRepository.findAll();
         }
 
-
         return games.stream()
                 .map(GameGetResponse::of)
                 .collect(Collectors.toList());
+    }
+
+    public StadiumGetResponse getStadiumAndSectionSeatCounts(Long gameId) {
+        Stadium stadium = gameRepository.getStadiumByGameId(gameId);
+        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameRepository.findUnBookedSeatsCountInSectionTypeByGameId(gameId);
+
+        return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
+    }
+
+    public List<SectionSeatCountResponse> getAvailableSeatsBySectionType(Long gameId, String type) {
+        return gameRepository.findSectionSeatCountsBySectionId(gameId, type);
+    }
+
+    public List<SeatGetResponse> getSeatInfoBySection(Long sectionId, Long gameId) {
+        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameId(sectionId ,gameId);
     }
 
     @Transactional
