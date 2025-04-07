@@ -31,6 +31,10 @@ public class Game {
 	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
 	private GameType type;
+
+	@ManyToOne
+	@JoinColumn(name = "stadium_id")
+	private Stadium stadium;
 	
 	private Integer point;
 

@@ -1,5 +1,7 @@
 package com.example.ticketable.domain.stadium.service;
 
+import static com.example.ticketable.common.exception.ErrorCode.TICKET_PAYMENT_NOT_FOUND;
+
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.stadium.dto.request.SeatCreateRequest;
@@ -12,6 +14,7 @@ import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeatService {
@@ -93,4 +97,12 @@ public class SeatService {
 
 
     // PRICE
+    public List<Seat> getAllSeatEntity(List<Long> seatIds) {
+        List<Seat> seats = seatRepository.findAllByIds(seatIds);
+        if (seats.size() != seatIds.size()) {
+            log.debug("요청한 좌석을 찾을 수 없습니다.");
+            throw new ServerException(TICKET_PAYMENT_NOT_FOUND);//오류 메세지수정 필요
+        }
+        return seats;
+    }
 }
