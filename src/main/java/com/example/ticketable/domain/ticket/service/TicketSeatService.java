@@ -24,12 +24,11 @@ public class TicketSeatService {
 		ticketSeatRepository.saveAll(ticketSeats);
 	}
 
-	public boolean checkDuplicateSeats(List<Long> seatIds, Long gameId) {
+	public void checkDuplicateSeats(List<Long> seatIds, Long gameId) {
 		if(ticketSeatRepository.existsByGameIdAndSeatIdInAndTicketDeletedAtIsNull(gameId, seatIds)) {
 			log.debug("이미 예매된 좌석입니다.");
 			throw new ServerException(TICKET_ALREADY_RESERVED);
 		}
-		return true;
 	}
 
 	public List<String> getTicketSeatsToString(Long ticketId) {
@@ -37,5 +36,9 @@ public class TicketSeatService {
 			.stream()
 			.map(ticketSeat -> ticketSeat.getSeat().getPosition())
 			.toList();
+	}
+
+	public void deleteAllTicketSeats(Long ticketId) {
+		ticketSeatRepository.deleteAllByTicketId(ticketId);
 	}
 }

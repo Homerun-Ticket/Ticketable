@@ -13,6 +13,8 @@ public interface TicketSeatRepository extends JpaRepository<TicketSeat, Long> {
 		+ "    and ts.ticket.deletedAt is null ")
 	List<TicketSeat> findByTicketIdWithSeat(Long ticketId);
 
-	//@Lock(value = LockModeType.PESSIMISTIC_WRITE)
+
 	boolean existsByGameIdAndSeatIdInAndTicketDeletedAtIsNull(Long gameId, List<Long> seatIds);
+
+	void deleteAllByTicketId(Long ticketId);
 }

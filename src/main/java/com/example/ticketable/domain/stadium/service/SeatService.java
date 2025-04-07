@@ -2,27 +2,26 @@ package com.example.ticketable.domain.stadium.service;
 
 import static com.example.ticketable.common.exception.ErrorCode.TICKET_PAYMENT_NOT_FOUND;
 
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.stadium.dto.request.SeatCreateRequest;
+import com.example.ticketable.domain.stadium.dto.request.SeatHoldRequest;
 import com.example.ticketable.domain.stadium.dto.request.SeatUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SeatCreateResponse;
-import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.SeatUpdateResponse;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SeatRepository;
+import com.example.ticketable.domain.ticket.service.TicketSeatService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,6 +33,10 @@ public class SeatService {
     private final SectionService sectionService;
 
     private final StadiumService stadiumService;
+
+    private final SeatHoldRedisUtil seatHoldRedisUtil;
+
+    private final TicketSeatService ticketSeatService;
 
     @Transactional
     public List<SeatCreateResponse> createSeats(Long stadiumId, Long sectionId, SeatCreateRequest request) {
@@ -104,5 +107,13 @@ public class SeatService {
             throw new ServerException(TICKET_PAYMENT_NOT_FOUND);//오류 메세지수정 필요
         }
         return seats;
+    }
+
+    @Transactional(readOnly = true)
+	public void holdSeat(Auth auth, SeatHoldRequest seatHoldRequest) {
+
+        ticketSeatService.checkDuplicateSeats(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId());
+        seatHoldRedisUtil.holdSeatAtomic(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
+        //seatHoldRedisUtil.holdSeat(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
     }
 }
