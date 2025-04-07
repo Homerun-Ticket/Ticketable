@@ -25,7 +25,6 @@ public class TicketPriceCalculator {
 
 		}
 
-
 		return ticketPrice;
 	}
 }

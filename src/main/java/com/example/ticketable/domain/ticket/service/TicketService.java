@@ -6,6 +6,7 @@ import static com.example.ticketable.domain.member.role.MemberRole.ROLE_MEMBER;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.service.GameService;
 import com.example.ticketable.domain.member.entity.Member;
@@ -13,6 +14,7 @@ import com.example.ticketable.domain.point.enums.PointHistoryType;
 import com.example.ticketable.domain.point.service.PointService;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.stadium.service.SeatService;
+import com.example.ticketable.domain.ticket.dto.TicketContext;
 import com.example.ticketable.domain.ticket.dto.request.TicketCreateRequest;
 import com.example.ticketable.domain.ticket.dto.response.TicketResponse;
 import com.example.ticketable.domain.ticket.entity.Ticket;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,8 @@ public class TicketService {
 	private final PointService pointService;
 	private final GameService gameService;
 	private final TicketPriceCalculator ticketPriceCalculator;
+	private final TicketCreateService ticketCreateService;
+	private final SeatHoldRedisUtil seatHoldRedisUtil;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
@@ -53,7 +58,7 @@ public class TicketService {
 	}
 
 	@Transactional
-	public TicketResponse createTicket(Auth auth, TicketCreateRequest ticketCreateRequest) {
+	public TicketResponse reservationTicket(Auth auth, TicketCreateRequest ticketCreateRequest) {
 
 		// 1. 요청 경기, 좌석 리스트 조회
 		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
@@ -88,15 +93,45 @@ public class TicketService {
 		return new TicketResponse(ticket.getId(), dtoTitle, dtoSeats, dtoStartTime, totalPoint);
 	}
 
+	public TicketResponse reservationTicketV2(Auth auth, TicketCreateRequest ticketCreateRequest) {
+
+		TicketContext ticketContext = ticketCreateService.createTicket(auth, ticketCreateRequest);
+		try {
+			ticketPaymentService.paymentTicket(ticketContext);
+			return ticketContext.toResponse();
+		} catch (ServerException e) {
+			log.error(e.getMessage());
+			ticketCreateService.rollBackTicket(ticketContext.getTicket());
+			throw new ServerException(USER_ACCESS_DENIED);
+		}
+
+	}
+
+	public TicketResponse reservationTicketV3(Auth auth, TicketCreateRequest ticketCreateRequest) {
+		TicketContext ticketContext = ticketCreateService.createTicketV2(auth, ticketCreateRequest);
+		try {
+			ticketPaymentService.paymentTicket(ticketContext);
+			return ticketContext.toResponse();
+		} catch (ServerException e) {
+			log.error(e.getMessage());
+			ticketCreateService.rollBackTicket(ticketContext.getTicket());
+			throw new ServerException(USER_ACCESS_DENIED);
+		} finally {
+			log.info("auth id : {}", auth.getId());
+			seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
+		}
+	}
+
 	@Transactional
-	public void deleteTicket(Auth auth, Long ticketId) {
+	public void cancelTicket(Auth auth, Long ticketId) {
+
 		// 1. 티켓 취소 처리
 		Ticket ticket = ticketRepository.findByIdWithMember(ticketId)
 			.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 		if (auth.getRole() == ROLE_MEMBER && !auth.getId().equals(ticket.getMember().getId())) {
 			throw new ServerException(USER_ACCESS_DENIED);
 		}
-		ticket.delete();
+		ticket.cancel();
 
 		// 2. 환불금 조회
 		int refund = ticketPaymentService.getTicketTotalPoint(ticketId);
@@ -112,7 +147,7 @@ public class TicketService {
 	@Transactional
 	public void deleteAllTicketsByCanceledGame(Auth auth, Long gameId) {
 		List<Ticket> allTicketsByGameId = ticketRepository.findAllByGameId(gameId);
-		allTicketsByGameId.forEach(ticket -> deleteTicket(auth, ticket.getId()));
+		allTicketsByGameId.forEach(ticket -> cancelTicket(auth, ticket.getId()));
 	}
 
 	/**
