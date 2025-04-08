@@ -9,6 +9,7 @@ import com.example.ticketable.domain.stadium.dto.response.SeatUpdateResponse;
 import com.example.ticketable.domain.stadium.service.SeatService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -58,6 +59,7 @@ public class SeatController {
         @RequestBody SeatHoldRequest seatHoldRequest
     ) {
         seatService.holdSeat(auth, seatHoldRequest);
+        log.debug("사용자 : {} , 좌석 : {} 선점완료", auth.getId(), seatHoldRequest.getSeatIds());
 
         return ResponseEntity.ok("모든 좌석 선점 성공, 15분안에 결제를 완료해주세요");
     }
