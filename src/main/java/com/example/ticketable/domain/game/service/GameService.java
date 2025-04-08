@@ -1,7 +1,9 @@
 package com.example.ticketable.domain.game.service;
 
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.domain.auction.service.AuctionService;
 import com.example.ticketable.domain.game.dto.request.GameCreateRequest;
 import com.example.ticketable.domain.game.dto.request.GameUpdateRequest;
 import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
@@ -15,12 +17,15 @@ import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountRe
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.service.StadiumService;
+import com.example.ticketable.domain.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import static com.example.ticketable.common.exception.ErrorCode.USER_ACCESS_DENIED;
 
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
+import com.example.ticketable.domain.ticket.service.TicketService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,8 @@ public class GameService {
     private final GameRepository gameRepository;
 
     private final StadiumService stadiumService;
+    private final TicketService ticketService;
+    private final AuctionService auctionService;
 
     @Transactional
     public GameCreateResponse createGame(GameCreateRequest request) {
@@ -95,9 +102,11 @@ public class GameService {
     }
 
     @Transactional
-    public void deleteGames(Long gameId) {
+    public void deleteGames(Long gameId, Auth auth) {
            Game game = gameRepository.findById(gameId).orElseThrow(() -> new ServerException(ErrorCode.GAME_NOT_FOUND));
            game.cancel();
+           ticketService.deleteAllTicketsByCanceledGame(auth, gameId);
+           auctionService.deleteAllAuctionsByCanceledGame(gameId);
     }
 
     // 날짜 계산 메서드

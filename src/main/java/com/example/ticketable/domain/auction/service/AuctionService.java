@@ -167,26 +167,29 @@ public class AuctionService {
 
 	/*
 	 * 경기 취소 시 로직
-	 * 최종 낙찰자에 대한 포인트 환불 + 티켓을 구매했던 사람으로 소유자 변경
+	 * 최종 낙찰자에 대한 포인트 환불 + 판매자 포인트 회수
 	 */
 	@Transactional
 	public void deleteAllAuctionsByCanceledGame(Long gameId) {
-		List<Auction> auctions = auctionRepository.findAllByTicketGameIdAndDeletedAtIsNull(gameId);
+		List<Auction> auctions = auctionRepository.findAllByGameId(gameId);
 
 		if (auctions.isEmpty()) {
 			return;
 		}
 
 		for (Auction auction : auctions) {
-			auction.setDeletedAt(); // 경매 종료 처리
+			// 경매 중인 경우, 경매 강제 종료 처리 (소프트딜리트)
+			if (auction.getDeletedAt() == null){
+				auction.setDeletedAt();
+			}
 
-			// 낙찰자 환불
+			// 낙찰자 혹은 현재 최고 입찰자 환불
 			if (auction.getBidder() != null) {
 				pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
 			}
 
-			// 티켓 소유권 되돌리기
-			auction.getTicket().changeOwner(auction.getSeller());
+			// 티켓 원래 주인 경매금액 뺏기
+			pointService.decreasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
 		}
 	}
 
