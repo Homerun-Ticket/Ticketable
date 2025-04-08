@@ -39,6 +39,9 @@ public enum ErrorCode {
 
 	// 포인트
 	NOT_ENOUGH_POINT("포인트가 부족합니다.", BAD_REQUEST),
+	EXCHANGE_WAITING("환전 대기 상태라 신청이 불가능합니다.", CONFLICT),
+	POINT_HISTORY_NOT_FOUND("해당 포인트 내역이 없습니다.", NOT_FOUND),
+	EXCHANGE_REQUEST_NOT_STATE("환전 요청 상태가 아닙니다.", BAD_REQUEST),
 
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),
