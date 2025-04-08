@@ -71,6 +71,7 @@ public class StadiumService {
     public void deleteStadium(Long stadiumId) {
         Stadium stadium = getStadium(stadiumId);
         stadium.delete();
+        imageService.deleteFile(stadium.getImagePath());
     }
 
     public Stadium getStadium(Long stadiumId) {
