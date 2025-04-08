@@ -33,7 +33,8 @@ public class PointHistoryService {
 	
 	@Transactional(readOnly = true)
 	public PagedModel<PointHistoryResponse> getPoints(Long authId, int page) {
-		Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+		Pageable pageable = PageRequest.of(page - 1, 10,
+			Sort.by(Sort.Direction.DESC, "createdAt"));
 		
 		Page<PointHistory> points = pointHistoryRepository.findAllByMemberId(authId, pageable);
 		

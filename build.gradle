@@ -21,6 +21,10 @@ configurations {
 
 repositories {
     mavenCentral()
+
+    // IamPort
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -50,6 +54,9 @@ dependencies {
 
     // Redisson
 //    implementation 'org.redisson:redisson-spring-boot-starter:3.37.0'
+
+    // IamPort
+    implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
 }
 
 tasks.named('test') {

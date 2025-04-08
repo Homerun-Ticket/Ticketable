@@ -10,22 +10,39 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @RequiredArgsConstructor
 @Getter
 public enum ErrorCode {
-	
+
 	// 경기장
 	STADIUM_NOT_FOUND("해당하는 경기장을 찾을 수 없습니다.", NOT_FOUND),
+	STADIUM_NAME_DUPLICATION("다른 경기장과 이름이 중복됩니다.", BAD_REQUEST),
 	SECTION_NOT_FOUND("해당하는 구역을 찾을 수 없습니다.", NOT_FOUND),
+	SECTION_CODE_DUPLICATION("다른 구역과 코드가 중복됩니다.", BAD_REQUEST),
 	SEAT_NOT_FOUND("해당하는 좌석을 찾을 수 없습니다.", NOT_FOUND),
 	COLUMN_NUMS_AND_BLIND_STATUS_NOT_SAME_SIZE("열 번호와 시야 방해 여부 리스트의 크기는 같아야 합니다.", BAD_REQUEST),
 	BLIND_STATUS_ALREADY_SET("시야 방해석 상태가 이미 요청된 상태와 동일합니다.", BAD_REQUEST),
 	SEATS_ALREADY_EXISTS("이미 구역에 좌석이 있습니다.", BAD_REQUEST),
 
+	// 경기
+	GAME_NOT_FOUND("해당하는 경기를 찾을 수 없습니다.", NOT_FOUND),
+
 	// 티켓
-	
+	TICKET_NOT_FOUND("해당하는 티켓을 찾을 수 없습니다.", BAD_REQUEST),
+	TICKET_PAYMENT_NOT_FOUND("티켓 결제 내역이 존재하지않습니다.", BAD_REQUEST),
+	TICKET_ALREADY_RESERVED("이미 예매된 좌석입니다.", HttpStatus.CONFLICT),
+
 	// 경매
-	
+	AUCTION_DUPLICATION("이미 경매에 등록한 티켓입니다.", CONFLICT),
+	AUCTION_ACCESS_DENIED("경매에 대한 권한이 없습니다.", FORBIDDEN),
+	AUCTION_TIME_OVER("경매 시간이 지났습니다.", BAD_REQUEST),
+	AUCTION_NOT_FOUND("경매를 찾을 수 없습니다", NOT_FOUND),
+	INVALID_BIDDING_AMOUNT("입찰액이 잘못되었습니다.", BAD_REQUEST),
+	EXIST_BID("입찰이 진행중입니다.", BAD_REQUEST),
+
 	// 포인트
 	NOT_ENOUGH_POINT("포인트가 부족합니다.", BAD_REQUEST),
-	
+	EXCHANGE_WAITING("환전 대기 상태라 신청이 불가능합니다.", CONFLICT),
+	POINT_HISTORY_NOT_FOUND("해당 포인트 내역이 없습니다.", NOT_FOUND),
+	EXCHANGE_REQUEST_NOT_STATE("환전 요청 상태가 아닙니다.", BAD_REQUEST),
+
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),
 	USER_NOT_LOGIN("로그인이 필요합니다. 로그인을 해주세요.", UNAUTHORIZED),
@@ -36,7 +53,7 @@ public enum ErrorCode {
 	USER_ROLE_SAME_AS_OLD("이전 역활과 동일할 수 없습니다.", BAD_REQUEST),
 	INVALID_USER_ROLE("유효하지 않는 role 입니다.", BAD_REQUEST),
 	INVALID_TOKEN("유효하지 않은 토큰입니다.", INTERNAL_SERVER_ERROR);
-	
+
 	private final String message;
 	private final HttpStatus status;
 }
