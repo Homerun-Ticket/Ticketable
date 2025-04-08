@@ -42,7 +42,6 @@ public class TicketService {
 	private final TicketPriceCalculator ticketPriceCalculator;
 	private final TicketCreateService ticketCreateService;
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
-	private static int count=1;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
