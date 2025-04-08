@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: ["develop", "feat/*", "main"]   # develop, feat/, main 브랜치에 푸시될 때 실행
+  pull_request:
+    branches: ["develop"]
+    types: [opened, synchronized]    # 새로운 pull request가 열렸을 때와 업데이트 되었을 때 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew   # Gradle wrapper 실행 권한 부여
+      - name: build with Gradle (H2 Tests)
+        run: ./gradlew build    # H2로 테스트 실행
+      - name: Login to AWS ECR
+        id: login
+        if: github.ref == 'refs/heads/main' && success()
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Build and Push Docker Image to ECR    # 도커 이미지 생성 후 ECR로 Push
+        if: github.ref == 'refs/heads/main' && success()
+        env:
+          AWS_REGISTRY: ${{ steps.login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          SHORT_SHA=$(echo $IMAGE_TAG | cut -c1-8)
+          docker build -t $AWS_REGISTRY/repo-tiketable:$SHORT_SHA .
+          docker push $AWS_REGISTRY/repo-tiketable:$SHORT_SHA
