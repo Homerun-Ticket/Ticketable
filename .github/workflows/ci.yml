@@ -26,7 +26,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && success()
         env:
           AWS_REGISTRY: ${{ steps.login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha::8 }}
+          IMAGE_TAG: ${{ github.sha.substring(0, 8) }}
         run: |
           docker build -t $AWS_REGISTRY/repo-tiketable:$IMAGE_TAG .
           docker push $AWS_REGISTRY/repo-tiketable:$IMAGE_TAG
