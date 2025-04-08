@@ -17,17 +17,14 @@ public class GameCreateRequest {
 
     private Integer point;
 
-    private String imagePath;
-
     private LocalDateTime startTime;
 
-    public GameCreateRequest(Long stadiumId, String away, String home, GameType type, Integer point, String imagePath, LocalDateTime startTime) {
+    public GameCreateRequest(Long stadiumId, String away, String home, GameType type, Integer point, LocalDateTime startTime) {
         this.stadiumId = stadiumId;
         this.away = away;
         this.home = home;
         this.type = type;
         this.point = point;
-        this.imagePath = imagePath;
         this.startTime = startTime;
     }
 }
