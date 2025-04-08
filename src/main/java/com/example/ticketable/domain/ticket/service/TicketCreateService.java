@@ -14,9 +14,12 @@ import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.example.ticketable.domain.ticket.repository.TicketRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TicketCreateService {
@@ -49,13 +52,9 @@ public class TicketCreateService {
 	@Transactional
 	public TicketContext createTicketV2(Auth auth, TicketCreateRequest ticketCreateRequest) {
 
-		seatHoldRedisUtil.checkHeldSeat(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId(), String.valueOf(auth.getId()));
-		try {
-			ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-		} catch (ServerException e) {
-			seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-			throw e;
-		}
+		seatHoldRedisUtil.checkHeldSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId(), String.valueOf(auth.getId()));
+		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
+
 
 		List<Seat> seats = seatService.getAllSeatEntity(ticketCreateRequest.getSeats());
 		Game game = gameService.getGameEntity(ticketCreateRequest.getGameId());

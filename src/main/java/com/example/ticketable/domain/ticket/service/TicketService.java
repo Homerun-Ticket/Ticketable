@@ -23,9 +23,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -41,6 +42,7 @@ public class TicketService {
 	private final TicketPriceCalculator ticketPriceCalculator;
 	private final TicketCreateService ticketCreateService;
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
+	private static int count=1;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
@@ -107,19 +109,22 @@ public class TicketService {
 
 	}
 
+	@Transactional
 	public TicketResponse reservationTicketV3(Auth auth, TicketCreateRequest ticketCreateRequest) {
+		log.debug("사용자 : {}, 좌석 : {} 예매 신청", auth.getId(), ticketCreateRequest.getSeats());
+
 		TicketContext ticketContext = ticketCreateService.createTicketV2(auth, ticketCreateRequest);
-		try {
-			ticketPaymentService.paymentTicket(ticketContext);
-			return ticketContext.toResponse();
-		} catch (ServerException e) {
-			log.error(e.getMessage());
-			ticketCreateService.rollBackTicket(ticketContext.getTicket());
-			throw new ServerException(USER_ACCESS_DENIED);
-		} finally {
-			log.info("auth id : {}", auth.getId());
-			seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-		}
+		ticketPaymentService.paymentTicket(ticketContext);
+
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCompletion(int status) {
+				log.debug("사용자 : {}, 좌석 : {} 해제 완료", auth.getId(), ticketCreateRequest.getSeats());
+				seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
+			}
+		});
+
+		return ticketContext.toResponse();
 	}
 
 	@Transactional

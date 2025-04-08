@@ -1,6 +1,6 @@
 package com.example.ticketable.domain.stadium.service;
 
-import static com.example.ticketable.common.exception.ErrorCode.TICKET_PAYMENT_NOT_FOUND;
+import static com.example.ticketable.common.exception.ErrorCode.SEAT_NOT_FOUND;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ErrorCode;
@@ -104,16 +104,13 @@ public class SeatService {
         List<Seat> seats = seatRepository.findAllByIds(seatIds);
         if (seats.size() != seatIds.size()) {
             log.debug("요청한 좌석을 찾을 수 없습니다.");
-            throw new ServerException(TICKET_PAYMENT_NOT_FOUND);//오류 메세지수정 필요
+            throw new ServerException(SEAT_NOT_FOUND);
         }
         return seats;
     }
 
-    @Transactional(readOnly = true)
-	public void holdSeat(Auth auth, SeatHoldRequest seatHoldRequest) {
-
+    public void holdSeat(Auth auth, SeatHoldRequest seatHoldRequest) {
         ticketSeatService.checkDuplicateSeats(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId());
         seatHoldRedisUtil.holdSeatAtomic(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
-        //seatHoldRedisUtil.holdSeat(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
     }
 }
