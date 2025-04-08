@@ -39,7 +39,7 @@ public class LuaScriptConfig {
 	 * @return releaseSeat.lua에 정의된 좌석 해제 Redis Lua 스크립트
 	 */
 	@Bean
-	public DefaultRedisScript<Long> realizeSeatRedisScript(){
+	public DefaultRedisScript<Long> releaseSeatRedisScript(){
 		DefaultRedisScript<Long> script = new DefaultRedisScript<>();
 		script.setLocation(new ClassPathResource("lua/releaseSeat.lua"));
 		script.setResultType(Long.class);
