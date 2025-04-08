@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.game.controller;
 
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.domain.game.dto.request.GameCreateRequest;
 import com.example.ticketable.domain.game.dto.request.GameUpdateRequest;
 import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
@@ -12,6 +13,7 @@ import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,8 +74,9 @@ public class GameController {
     }
 
     @DeleteMapping("/v1/games/{gameId}")
-    public ResponseEntity<Void> deleteGame(@PathVariable Long gameId) {
-        gameService.deleteGames(gameId);
+    public ResponseEntity<Void> deleteGame(@PathVariable Long gameId,
+        @AuthenticationPrincipal Auth auth) {
+        gameService.deleteGames(gameId, auth);
         return ResponseEntity.ok().build();
     }
 
