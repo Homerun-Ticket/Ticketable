@@ -5,7 +5,7 @@ on:
     branches: ["develop", "feat/*"]   # develop, feat/ 브랜치에 푸시될 때 실행
     pull_request:
       branches: ["develop"]
-      type: [opened, synchronized]    # 새로운 pull request가 열렸을 때와 업데이트 되었을 때 실행
+      types: [opened, synchronized]    # 새로운 pull request가 열렸을 때와 업데이트 되었을 때 실행
 
 jobs:
   build:
