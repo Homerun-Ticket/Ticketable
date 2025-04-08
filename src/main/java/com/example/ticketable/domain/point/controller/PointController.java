@@ -26,7 +26,7 @@ public class PointController {
 		return ResponseEntity.ok(pointService.addPoint(auth.getId(), request));
 	}
 	
-	@PostMapping("/v1/points")
+	@PostMapping("/v1/points/exchange")
 	public ResponseEntity<PointResponse> exchangePoint(
 		@AuthenticationPrincipal Auth auth,
 		@Valid @RequestBody ExchangePointRequest request
