@@ -50,6 +50,9 @@ dependencies {
 
     // Redisson
 //    implementation 'org.redisson:redisson-spring-boot-starter:3.37.0'
+
+    // AWS S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {
