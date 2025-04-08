@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class PointAdminController {
 	
-	private PointAdminService pointAdminService;
+	private final PointAdminService pointAdminService;
 	
-	@PatchMapping("/v1/admin/pointHistory/{pointHistoryId}")
+	@PatchMapping("/v1/admin/pointHistory/{pointHistoryId}/exchange")
 	public ResponseEntity<PointAdminResponse> exchangePoint(
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long pointHistoryId
 	) {
-		return ResponseEntity.ok(pointAdminService.exchangePoint(auth.getId(), pointHistoryId));
+		return ResponseEntity.ok(pointAdminService.exchangePoint(auth, pointHistoryId));
 	}
 	
 	@GetMapping("v1/admin/pointHistory/{pointHistoryId}")
@@ -30,7 +30,7 @@ public class PointAdminController {
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long pointHistoryId
 	) {
-		return ResponseEntity.ok(pointAdminService.getAdminPoint(auth.getId(), pointHistoryId));
+		return ResponseEntity.ok(pointAdminService.getAdminPoint(auth, pointHistoryId));
 	}
 	
 	@GetMapping("v1/admin/pointHistory")
@@ -38,6 +38,6 @@ public class PointAdminController {
 		@AuthenticationPrincipal Auth auth,
 		@RequestParam int page
 	) {
-		return ResponseEntity.ok(pointAdminService.getAdminPoints(auth.getId(), page));
+		return ResponseEntity.ok(pointAdminService.getAdminPoints(auth, page));
 	}
 }

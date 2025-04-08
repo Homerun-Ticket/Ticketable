@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.point.service;
 
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.point.dto.response.PointAdminResponse;
@@ -29,8 +30,8 @@ public class PointAdminService {
 	private final PointRepository pointRepository;
 	
 	@Transactional
-	public PointAdminResponse exchangePoint(Long authId, Long pointHistoryId) {
-		checkAdmin(authId);
+	public PointAdminResponse exchangePoint(Auth auth, Long pointHistoryId) {
+		checkAdmin(auth);
 		
 		PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
 			.orElseThrow(() -> new ServerException(POINT_HISTORY_NOT_FOUND));
@@ -43,23 +44,23 @@ public class PointAdminService {
 		Point point = pointRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 		
-		pointHistory.exchange();
 		point.minusPoint(pointHistory.getCharge());
+		pointHistory.exchange();
 		
 		return new PointAdminResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
 	}
 	
 	@Transactional(readOnly = true)
-	public PointHistoryResponse getAdminPoint(Long authId, Long pointHistoryId) {
-		checkAdmin(authId);
+	public PointHistoryResponse getAdminPoint(Auth auth, Long pointHistoryId) {
+		checkAdmin(auth);
 		PointHistory pointHistory = getPointHistory(pointHistoryId);
 		
 		return PointHistoryResponse.of(pointHistory);
 	}
 	
 	@Transactional(readOnly = true)
-	public PagedModel<PointHistoryResponse> getAdminPoints(Long authId, int page) {
-		checkAdmin(authId);
+	public PagedModel<PointHistoryResponse> getAdminPoints(Auth auth, int page) {
+		checkAdmin(auth);
 		
 		Pageable pageable = PageRequest.of(page - 1, 10,
 			Sort.by(Sort.Direction.ASC, "createdAt"));
@@ -69,9 +70,8 @@ public class PointAdminService {
 		return new PagedModel<>(points.map(PointHistoryResponse::of));
 	}
 	
-	private void checkAdmin(Long memberId) {
-		Member member = Member.fromAuth(memberId);
-		if (!member.getRole().equals(ROLE_ADMIN)) {
+	private void checkAdmin(Auth auth) {
+		if (!auth.getRole().equals(ROLE_ADMIN)) {
 			throw new ServerException(USER_ACCESS_DENIED);
 		}
 	}
