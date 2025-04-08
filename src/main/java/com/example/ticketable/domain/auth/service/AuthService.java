@@ -10,6 +10,7 @@ import com.example.ticketable.domain.member.repository.MemberRepository;
 import com.example.ticketable.domain.member.role.MemberRole;
 import com.example.ticketable.domain.point.entity.Point;
 import com.example.ticketable.domain.point.repository.PointRepository;
+import com.example.ticketable.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,11 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
-	private final PointRepository pointRepository;
+	private final PointService pointService;
 	
 	@Transactional
 	public AuthResponse signup(SignupRequest request) {
-		if (!request.getPassword().equals(request.getRePassword())) {
+		if (!request.validRePassword()) {
 			throw new ServerException(INVALID_PASSWORD);
 		}
 		
@@ -44,11 +45,7 @@ public class AuthService {
 			.build();
 		Member savedMember = memberRepository.save(member);
 		
-		Point point = Point.builder()
-			.point(0)
-			.member(savedMember)
-			.build();
-		pointRepository.save(point);
+		pointService.createPoint(savedMember);
 		
 		String accessToken = jwtUtil.createAccessToken(
 			savedMember.getId(), savedMember.getEmail(), savedMember.getName(), savedMember.getRole()

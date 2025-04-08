@@ -73,6 +73,16 @@ public class PointService {
 		pointHistoryService.createPointHistory(charge, type, member);
 	}
 	
+	@Transactional
+	public void createPoint(Member member) {
+		Point point = Point.builder()
+			.point(0)
+			.member(member)
+			.build();
+		
+		pointRepository.save(point);
+	}
+	
 	/**
 	 * 해당 멤버 아이디를 통해 해당 멤버의 포인트를 가져옴.
 	 * 만약 멤버가 존재하지 않거나, 삭제되었다면 예외를 던짐
