@@ -74,9 +74,10 @@ public class GameController {
     }
 
     @DeleteMapping("/v1/games/{gameId}")
-    public ResponseEntity<Void> deleteGame(@PathVariable Long gameId,
-        @AuthenticationPrincipal Auth auth) {
-        gameService.deleteGames(gameId, auth);
+    public ResponseEntity<Void> deleteGame(
+        @PathVariable Long gameId
+    ) {
+        gameService.deleteGames(gameId);
         return ResponseEntity.ok().build();
     }
 
