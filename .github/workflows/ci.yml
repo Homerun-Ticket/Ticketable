@@ -25,8 +25,8 @@ jobs:
       - name: Build and Push Docker Image to ECR    # 도커 이미지 생성 후 ECR로 Push
         if: github.ref == 'refs/heads/main' && success()
         env:
-          AWS_REGISTRY: ${{ steps.login.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha.substring(0, 8) }}
+          AWS_REGISTRY: ${{steps.login.outputs.registry}}
+          IMAGE_TAG: ${{github.sha.substring(0, 8)}}
         run: |
           docker build -t $AWS_REGISTRY/repo-tiketable:$IMAGE_TAG .
           docker push $AWS_REGISTRY/repo-tiketable:$IMAGE_TAG
