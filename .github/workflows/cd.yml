@@ -13,14 +13,20 @@ jobs:
       - name: SSH Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          ref: main
           host: ${{ secrets.SSH_HOST }}
-          username: ec2-user # EC2 인스턴스 사용자 이름
+          username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."
-            docker pull ${{ secrets.AWS_REGISTRY }}:${{ github.sha::8 }}    # Docker 이미지 pull
-            docker stop ticketable_web || true   # 이전 컨테이너 중지 및 제거
+            docker pull ${{ secrets.AWS_REGISTRY }}/repo-tiketable:${{ github.sha::8 }}
+            docker stop ticketable_web || true
             docker rm ticketable_web || true
-            docker run -d --name ticketable_web -p 80:80 ${{ secrets.AWS_REGISTRY }}/repo-tiketable:${{ github.sha::8 }}    # 새 컨테이너 실행
+            docker run -d --name ticketable_web \
+              -p 80:8080 \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN }} \
+              ${{ secrets.AWS_REGISTRY }}/repo-tiketable:${{ github.sha::8 }}
             echo "Deployment successful!"
