@@ -7,13 +7,8 @@ import static com.example.ticketable.domain.member.role.MemberRole.ROLE_MEMBER;
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.common.util.SeatHoldRedisUtil;
-import com.example.ticketable.domain.game.entity.Game;
-import com.example.ticketable.domain.game.service.GameService;
-import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
 import com.example.ticketable.domain.point.service.PointService;
-import com.example.ticketable.domain.stadium.entity.Seat;
-import com.example.ticketable.domain.stadium.service.SeatService;
 import com.example.ticketable.domain.ticket.dto.TicketContext;
 import com.example.ticketable.domain.ticket.dto.request.TicketCreateRequest;
 import com.example.ticketable.domain.ticket.dto.response.TicketResponse;
@@ -36,10 +31,7 @@ public class TicketService {
 	private final TicketRepository ticketRepository;
 	private final TicketSeatService ticketSeatService;
 	private final TicketPaymentService ticketPaymentService;
-	private final SeatService seatService;
 	private final PointService pointService;
-	private final GameService gameService;
-	private final TicketPriceCalculator ticketPriceCalculator;
 	private final TicketCreateService ticketCreateService;
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
 
@@ -56,56 +48,6 @@ public class TicketService {
 		List<Ticket> allTickets = ticketRepository.findAllByMemberIdWithGame(auth.getId());
 
 		return allTickets.stream().map(this::convertTicketResponse).toList();
-	}
-
-	@Transactional
-	public TicketResponse reservationTicket(Auth auth, TicketCreateRequest ticketCreateRequest) {
-
-		// 1. 요청 경기, 좌석 리스트 조회
-		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-
-		List<Seat> seats = seatService.getAllSeatEntity(ticketCreateRequest.getSeats());
-		Game game = gameService.getGameEntity(ticketCreateRequest.getGameId());
-
-		// 2. 좌석 총합 요금 계산
-		int totalPoint = ticketPriceCalculator.calculateTicketPrice(game, seats);
-		log.debug("좌석 금액 : {}", totalPoint);
-
-		// 3. 포인트 차감
-		pointService.decreasePoint(auth.getId(), totalPoint, PointHistoryType.RESERVATION);
-
-		// 4. 티켓 생성
-		Member member = Member.fromAuth(auth.getId());
-		Ticket ticket = ticketRepository.save(new Ticket(member, game));
-
-		// 5. 좌석 연결
-		ticketSeatService.createAll(seats, game, ticket);
-
-		// 6. 결제 기록
-		ticketPaymentService.create(ticket, member, totalPoint);
-
-		// 7. DTO 필드 세팅
-		String dtoTitle = game.getHome() + " vs " + game.getAway();
-		List<String> dtoSeats = seats.stream()
-			.map(Seat::getPosition)
-			.toList();
-		LocalDateTime dtoStartTime = game.getStartTime();
-
-		return new TicketResponse(ticket.getId(), dtoTitle, dtoSeats, dtoStartTime, totalPoint);
-	}
-
-	public TicketResponse reservationTicketV2(Auth auth, TicketCreateRequest ticketCreateRequest) {
-
-		TicketContext ticketContext = ticketCreateService.createTicket(auth, ticketCreateRequest);
-		try {
-			ticketPaymentService.paymentTicket(ticketContext);
-			return ticketContext.toResponse();
-		} catch (ServerException e) {
-			log.error(e.getMessage());
-			ticketCreateService.rollBackTicket(ticketContext.getTicket());
-			throw new ServerException(USER_ACCESS_DENIED);
-		}
-
 	}
 
 	@Transactional
@@ -149,9 +91,8 @@ public class TicketService {
 	 * @param gameId
 	 */
 	@Transactional
-	public void deleteAllTicketsByCanceledGame(Auth auth, Long gameId) {
-		List<Ticket> allTicketsByGameId = ticketRepository.findAllByGameId(gameId);
-		allTicketsByGameId.forEach(ticket -> cancelTicket(auth, ticket.getId()));
+	public void deleteAllTicketsByCanceledGame(Long gameId) {
+		ticketRepository.softDeleteAllByGameId(gameId);
 	}
 
 	/**

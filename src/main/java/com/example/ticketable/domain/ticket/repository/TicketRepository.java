@@ -4,6 +4,7 @@ import com.example.ticketable.domain.ticket.entity.Ticket;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -38,4 +39,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 		+ "  WHERE t.id = :id "
 		+ "    AND t.deletedAt is null ")
 	Optional<Ticket>findByIdWithGameAndMember(Long id);
+
+	@Modifying
+	@Query("update Ticket t "
+		+ "    set t.deletedAt = now()"
+		+ " where t.game.id = :gameId ")
+	void softDeleteAllByGameId(Long gameId);
 }
