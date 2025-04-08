@@ -1,7 +1,9 @@
 package com.example.ticketable.domain.game.service;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.common.service.ImageService;
 import com.example.ticketable.domain.game.dto.request.GameCreateRequest;
 import com.example.ticketable.domain.game.dto.request.GameUpdateRequest;
 import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
@@ -25,9 +27,12 @@ import com.example.ticketable.domain.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,20 +42,32 @@ public class GameService {
 
     private final StadiumService stadiumService;
 
+    private final ImageService imageService;
+
+    private static final String GAME_FOLDER = "game/";
+
     @Transactional
-    public GameCreateResponse createGame(GameCreateRequest request) {
-        Stadium stadium = stadiumService.getStadium(request.getStadiumId());
-        Game game = gameRepository.save(Game.builder()
-                .stadium(stadium)
-                .away(request.getAway())
-                .home(request.getHome())
-                .type(request.getType())
-                .point(request.getPoint())
-                .imagePath(request.getImagePath())
-                .startTime(request.getStartTime())
-                .build()
-        );
-        return GameCreateResponse.of(game);
+    public GameCreateResponse createGame(GameCreateRequest request, MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        String fileKey = GAME_FOLDER + UUID.randomUUID()+ "_" + originalFilename;
+        String imagePath = imageService.saveFile(file, fileKey);
+        try {
+            Stadium stadium = stadiumService.getStadium(request.getStadiumId());
+            Game game = gameRepository.save(Game.builder()
+                    .stadium(stadium)
+                    .away(request.getAway())
+                    .home(request.getHome())
+                    .type(request.getType())
+                    .point(request.getPoint())
+                    .imagePath(imagePath)
+                    .startTime(request.getStartTime())
+                    .build()
+            );
+            return GameCreateResponse.of(game);
+        } catch (ServerException e) {
+            imageService.deleteFile(imagePath); // 이미지 삭제 로직
+            throw new ServerException(ErrorCode.GAME_SAVE_FAILED);
+        }
     }
 
     public List<GameGetResponse> getGames(String team, LocalDateTime date) {

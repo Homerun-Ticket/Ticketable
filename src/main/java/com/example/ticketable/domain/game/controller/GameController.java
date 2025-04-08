@@ -9,9 +9,11 @@ import com.example.ticketable.domain.game.service.GameService;
 import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,8 +25,11 @@ public class GameController {
     private final GameService gameService;
 
     @PostMapping("/v1/games")
-    public ResponseEntity<GameCreateResponse> createGame(@RequestBody GameCreateRequest request) {
-        return ResponseEntity.ok(gameService.createGame(request));
+    public ResponseEntity<GameCreateResponse> createGame(
+            @Valid @RequestPart(value = "json") GameCreateRequest request,
+            @RequestPart(value = "image") MultipartFile file
+            ) {
+        return ResponseEntity.ok(gameService.createGame(request, file));
     }
 
     @GetMapping("/v1/games")
