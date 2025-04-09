@@ -2,7 +2,7 @@
 FROM eclipse-temurin:17-jre-alpine
 
 # 이미지를 만든 사람
-MAINTAINER Inhak <inhak1122@google.com>
+LABEL maintainer="Inhak <inhak1122@google.com>"
 
 # 빌드된 JAR 파일 복사
 COPY build/libs/*.jar app.jar
