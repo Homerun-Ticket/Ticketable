@@ -13,6 +13,8 @@ import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.dto.response.GameUpdateResponse;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
+import com.example.ticketable.domain.queue.repository.QueueRepository;
+import com.example.ticketable.domain.queue.service.QueueService;
 import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse;
@@ -40,12 +42,14 @@ public class GameService {
     private final GameRepository gameRepository;
 
     private final StadiumService stadiumService;
-    private final TicketService ticketService;
+   // private final TicketService ticketService;
     private final AuctionService auctionService;
 
     private final ImageService imageService;
 
     private static final String GAME_FOLDER = "game/";
+
+    private final QueueService queueService;
 
     @Transactional
     public GameCreateResponse createGame(GameCreateRequest request, MultipartFile file) {
@@ -98,6 +102,13 @@ public class GameService {
         return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
     }
 
+    public StadiumGetResponse getStadiumAndSectionSeatCounts(Long gameId, String uuid) {
+        Stadium stadium = gameRepository.getStadiumByGameId(gameId);
+        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameRepository.findUnBookedSeatsCountInSectionTypeByGameId(gameId);
+
+        return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
+    }
+
     public List<SectionSeatCountResponse> getAvailableSeatsBySectionType(Long gameId, String type) {
         return gameRepository.findSectionSeatCountsBySectionId(gameId, type);
     }
@@ -117,7 +128,7 @@ public class GameService {
     public void deleteGames(Long gameId) {
            Game game = gameRepository.findById(gameId).orElseThrow(() -> new ServerException(ErrorCode.GAME_NOT_FOUND));
            game.cancel();
-           ticketService.deleteAllTicketsByCanceledGame(gameId);
+           //ticketService.deleteAllTicketsByCanceledGame(gameId);
            auctionService.deleteAllAuctionsByCanceledGame(gameId);
     }
 

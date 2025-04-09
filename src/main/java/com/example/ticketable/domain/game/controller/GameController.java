@@ -1,30 +1,33 @@
 package com.example.ticketable.domain.game.controller;
 
-import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.domain.game.dto.request.GameCreateRequest;
 import com.example.ticketable.domain.game.dto.request.GameUpdateRequest;
 import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
 import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.dto.response.GameUpdateResponse;
 import com.example.ticketable.domain.game.service.GameService;
+import com.example.ticketable.domain.queue.dto.QueueResponse;
+import com.example.ticketable.domain.queue.service.QueueService;
 import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class GameController {
     private final GameService gameService;
+    private final QueueService queueService;
 
     @PostMapping("/v1/games")
     public ResponseEntity<GameCreateResponse> createGame(
@@ -47,6 +50,23 @@ public class GameController {
             @PathVariable Long gameId
     ) {
         return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCounts(gameId));
+    }
+
+    @GetMapping("/v2/games/{gameId}")
+    public ResponseEntity<?> getStadiumAndSectionSeatCountsV2(
+        @PathVariable Long gameId,
+        @RequestParam Long userId
+    ) {
+        //log.info("call by : {}",userId);
+        if(queueService.canJob(gameId, userId)) {
+            try {
+                return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCounts(gameId));
+            } finally {
+                queueService.delete(gameId, userId);
+            }
+        }
+        Long rank = queueService.getRank(gameId, userId);
+        return ResponseEntity.ok().body(new QueueResponse("사용자가 많습니다.", "대기", rank));
     }
 
     @GetMapping("/v1/games/{gameId}/sectionTypes")
