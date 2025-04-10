@@ -2,16 +2,17 @@ package com.example.ticketable.domain.point.service;
 
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.entity.Member;
-import com.example.ticketable.domain.point.dto.request.AddPointRequest;
+import com.example.ticketable.domain.point.dto.request.ExchangePointRequest;
 import com.example.ticketable.domain.point.dto.response.PointResponse;
 import com.example.ticketable.domain.point.entity.Point;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
+import com.example.ticketable.domain.point.repository.PointHistoryRepository;
 import com.example.ticketable.domain.point.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.ticketable.common.exception.ErrorCode.USER_NOT_FOUND;
+import static com.example.ticketable.common.exception.ErrorCode.*;
 import static com.example.ticketable.domain.point.enums.PointHistoryType.*;
 
 @RequiredArgsConstructor
@@ -20,11 +21,35 @@ public class PointService {
 	
 	private final PointRepository pointRepository;
 	private final PointHistoryService pointHistoryService;
+	private final PointHistoryRepository pointHistoryRepository;
+	
+	/**
+	 * TODO : 포인트를 감소시키고, 환전 유저의 계좌에 돈을 보내는 로직 추가해야함
+	 */
+	@Transactional
+	public PointResponse exchangePoint(Long authId, ExchangePointRequest request) {
+		Point point = getPoint(authId);
+		if (point.getPoint() < request.getPoint()) {
+			throw new ServerException(NOT_ENOUGH_POINT);
+		}
+		
+		if (pointHistoryRepository.existsByMemberIdAndType(authId, EXCHANGE_REQUEST)) {
+			throw new ServerException(EXCHANGE_WAITING);
+		}
+		Member member = Member.fromAuth(authId);
+		
+		pointHistoryService.createPointHistory(request.getPoint(), EXCHANGE_REQUEST, member);
+		return new PointResponse(authId, request.getPoint());
+	}
 	
 	@Transactional
-	public PointResponse addPoint(Long authId, AddPointRequest request) {
-		increasePoint(authId, request.getPoint(), FILL);
-		return new PointResponse(authId, request.getPoint());
+	public void createPoint(Member member) {
+		Point point = Point.builder()
+			.point(0)
+			.member(member)
+			.build();
+		
+		pointRepository.save(point);
 	}
 	
 	/**
