@@ -57,6 +57,9 @@ dependencies {
 
     // IamPort
     implementation 'com.github.iamport:iamport-rest-client-java:0.1.6'
+
+    // thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {
