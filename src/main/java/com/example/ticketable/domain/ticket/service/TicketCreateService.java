@@ -31,14 +31,9 @@ public class TicketCreateService {
 	private final TicketSeatService ticketSeatService;
 	private final SeatService seatService;
 	private final TicketPriceCalculator ticketPriceCalculator;
-	private final SeatHoldRedisUtil seatHoldRedisUtil;
 
 	@Transactional
 	public TicketContext createTicketV2(Auth auth, TicketCreateRequest ticketCreateRequest) {
-
-		seatHoldRedisUtil.checkHeldSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId(), String.valueOf(auth.getId()));
-		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-
 
 		List<Seat> seats = seatService.getAllSeatEntity(ticketCreateRequest.getSeats());
 		Game game = gameRepository.findById(ticketCreateRequest.getGameId()).orElseThrow(()->new ServerException(GAME_NOT_FOUND));

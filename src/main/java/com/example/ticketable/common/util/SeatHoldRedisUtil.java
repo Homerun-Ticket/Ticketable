@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ public class SeatHoldRedisUtil {
 
 	private final RedisTemplate<String, String> redisTemplate;
 	private final DefaultRedisScript<Long> holdSeatRedisScript;
-	private final DefaultRedisScript<Long> realizeSeatRedisScript;
+	private final DefaultRedisScript<Long> releaseSeatRedisScript;
 	private final DefaultRedisScript<Long> checkHeldRedisScript;
 
 	private static final Duration SEAT_HOLD_TTL = Duration.ofMinutes(15);
@@ -37,7 +36,7 @@ public class SeatHoldRedisUtil {
 
 	public void releaseSeatAtomic(List<Long> seatIds, Long gameId) {
 		List<String> keys = seatIds.stream().map(id -> createKey(id, gameId)).toList();
-		redisTemplate.execute(realizeSeatRedisScript, keys);
+		redisTemplate.execute(releaseSeatRedisScript, keys);
 	}
 
 	public void checkHeldSeatAtomic(List<Long> seatIds, Long gameId, String value) {

@@ -5,6 +5,7 @@ import static com.example.ticketable.common.exception.ErrorCode.USER_ACCESS_DENI
 import static com.example.ticketable.domain.member.role.MemberRole.ROLE_MEMBER;
 
 import com.example.ticketable.common.entity.Auth;
+import com.example.ticketable.common.event.SeatHoldReleaseEvent;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
@@ -18,10 +19,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -34,6 +34,7 @@ public class TicketService {
 	private final PointService pointService;
 	private final TicketCreateService ticketCreateService;
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
@@ -51,20 +52,16 @@ public class TicketService {
 	}
 
 	@Transactional
-	public TicketResponse reservationTicketV3(Auth auth, TicketCreateRequest ticketCreateRequest) {
+	public TicketResponse reservationTicketV4(Auth auth, TicketCreateRequest ticketCreateRequest) {
 		log.debug("사용자 : {}, 좌석 : {} 예매 신청", auth.getId(), ticketCreateRequest.getSeats());
+
+		seatHoldRedisUtil.checkHeldSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId(), String.valueOf(auth.getId()));
+		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
 
 		TicketContext ticketContext = ticketCreateService.createTicketV2(auth, ticketCreateRequest);
 		ticketPaymentService.paymentTicket(ticketContext);
 
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-			@Override
-			public void afterCompletion(int status) {
-				log.debug("사용자 : {}, 좌석 : {} 해제 완료", auth.getId(), ticketCreateRequest.getSeats());
-				seatHoldRedisUtil.releaseSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-			}
-		});
-
+		eventPublisher.publishEvent(new SeatHoldReleaseEvent(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId()));
 		return ticketContext.toResponse();
 	}
 
