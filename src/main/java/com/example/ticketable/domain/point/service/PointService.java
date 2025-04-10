@@ -2,7 +2,6 @@ package com.example.ticketable.domain.point.service;
 
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.entity.Member;
-import com.example.ticketable.domain.point.dto.request.AddPointRequest;
 import com.example.ticketable.domain.point.dto.request.ExchangePointRequest;
 import com.example.ticketable.domain.point.dto.response.PointResponse;
 import com.example.ticketable.domain.point.entity.Point;
@@ -24,12 +23,6 @@ public class PointService {
 	private final PointHistoryService pointHistoryService;
 	private final PointHistoryRepository pointHistoryRepository;
 	
-	@Transactional
-	public PointResponse addPoint(Long authId, AddPointRequest request) {
-		increasePoint(authId, request.getPoint(), FILL);
-		return new PointResponse(authId, request.getPoint());
-	}
-	
 	/**
 	 * TODO : 포인트를 감소시키고, 환전 유저의 계좌에 돈을 보내는 로직 추가해야함
 	 */
@@ -47,6 +40,16 @@ public class PointService {
 		
 		pointHistoryService.createPointHistory(request.getPoint(), EXCHANGE_REQUEST, member);
 		return new PointResponse(authId, request.getPoint());
+	}
+	
+	@Transactional
+	public void createPoint(Member member) {
+		Point point = Point.builder()
+			.point(0)
+			.member(member)
+			.build();
+		
+		pointRepository.save(point);
 	}
 	
 	/**
@@ -71,16 +74,6 @@ public class PointService {
 		
 		point.minusPoint(charge);
 		pointHistoryService.createPointHistory(charge, type, member);
-	}
-	
-	@Transactional
-	public void createPoint(Member member) {
-		Point point = Point.builder()
-			.point(0)
-			.member(member)
-			.build();
-		
-		pointRepository.save(point);
 	}
 	
 	/**

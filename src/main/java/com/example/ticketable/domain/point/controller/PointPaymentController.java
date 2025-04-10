@@ -1,9 +1,9 @@
 package com.example.ticketable.domain.point.controller;
 
 import com.example.ticketable.common.entity.Auth;
-import com.example.ticketable.domain.point.entity.PointPayment;
 import com.example.ticketable.domain.point.service.PointPaymentService;
 import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +22,9 @@ public class PointPaymentController {
 	private final PointPaymentService pointPaymentService;
 	
 	@PostMapping("/v1/payments/{imp_uid}")
-	public ResponseEntity<IamportResponse<PointPayment>> iamPortPayment(
+	public ResponseEntity<IamportResponse<Payment>> iamPortPayment(
 		@AuthenticationPrincipal Auth auth,
-		@PathVariable Long imp_uid
+		@PathVariable String imp_uid
 	) {
 		log.info("imp_uid = {}", imp_uid);
 		return ResponseEntity.ok(pointPaymentService.iamPortPayment(auth, imp_uid));

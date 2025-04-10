@@ -37,6 +37,8 @@ public class SecurityConfig {
 			.logout(AbstractHttpConfigurer::disable)
 			.rememberMe(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/login.html").permitAll()
+				.requestMatchers("/point-charge.html").permitAll()
 				.requestMatchers("/api/v1/auth/**").permitAll()
 				.anyRequest().authenticated()
 			);
