@@ -56,7 +56,7 @@ public class AuctionController {
 	}
 
 	@PostMapping("/v1/auctions/{auctionId}")
-	public ResponseEntity<AuctionResponse> bidAuctionV1(
+	public ResponseEntity<AuctionResponse> bidAuction(
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long auctionId,
 		@Valid @RequestBody AuctionBidRequest dto

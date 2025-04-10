@@ -35,7 +35,5 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 	@EntityGraph(attributePaths = {"seller", "bidder", "ticket"})
 	List<Auction> findAllByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
 
-	Auction findByIdAndDeletedAtIsNull(Long id);
-
 	boolean existsByTicket(Ticket ticket);
 }
