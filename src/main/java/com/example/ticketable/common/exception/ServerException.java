@@ -1,10 +1,13 @@
 package com.example.ticketable.common.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class ServerException extends RuntimeException {
 	private final ErrorCode errorCode;
+
+	public ServerException(ErrorCode errorCode) {
+		super(errorCode.getMessage());
+		this.errorCode = errorCode;
+	}
 }

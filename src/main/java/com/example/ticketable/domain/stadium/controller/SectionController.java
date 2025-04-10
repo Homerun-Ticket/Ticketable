@@ -26,15 +26,7 @@ public class SectionController {
         return ResponseEntity.ok(sectionService.createSection(stadiumId, request));
     }
 
-    @GetMapping("/v1/stadiums/{stadiumId}/sections")
-    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionCode(
-            @PathVariable Long stadiumId,
-            @RequestParam String type
-    ) {
-        return ResponseEntity.ok(sectionService.getAvailableSeatsBySectionCode(stadiumId, type));
-    }
-
-    @PutMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}")
+    @PutMapping("/v1/sections/{sectionId}")
     public ResponseEntity<SectionUpdateResponse> updateSection(
             @PathVariable Long sectionId,
             @RequestBody SectionUpdateRequest request
@@ -43,7 +35,7 @@ public class SectionController {
     }
 
 
-    @DeleteMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}")
+    @DeleteMapping("/v1/sections/{sectionId}")
     public ResponseEntity<Void> deleteSection(
             @PathVariable Long sectionId
     ) {

@@ -23,6 +23,11 @@ public enum ErrorCode {
 
 	// 경기
 	GAME_NOT_FOUND("해당하는 경기를 찾을 수 없습니다.", NOT_FOUND),
+	GAME_SAVE_FAILED("경기 저장 실패", INTERNAL_SERVER_ERROR),
+
+	// 이미지
+	IMAGE_UPLOAD_FAILED("S3 이미지 업로드 실패", INTERNAL_SERVER_ERROR),
+	IMAGE_DELETE_FAILED("S3 이미지 삭제 실패", INTERNAL_SERVER_ERROR),
 
 	// 티켓
 	TICKET_NOT_FOUND("해당하는 티켓을 찾을 수 없습니다.", BAD_REQUEST),

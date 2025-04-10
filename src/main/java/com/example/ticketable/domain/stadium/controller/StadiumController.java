@@ -6,9 +6,11 @@ import com.example.ticketable.domain.stadium.dto.response.StadiumCreateResponse;
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.StadiumUpdateResponse;
 import com.example.ticketable.domain.stadium.service.StadiumService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,13 +19,11 @@ public class StadiumController {
     private final StadiumService stadiumService;
 
     @PostMapping("/v1/stadiums")
-    public ResponseEntity<StadiumCreateResponse> createStadium(@RequestBody StadiumCreateRequest request) {
-        return ResponseEntity.ok(stadiumService.createStadium(request));
-    }
-
-    @GetMapping("/v1/stadiums/{stadiumId}")
-    public ResponseEntity<StadiumGetResponse> getStadium(@PathVariable Long stadiumId) {
-        return ResponseEntity.ok(stadiumService.getStadiumDto(stadiumId));
+    public ResponseEntity<StadiumCreateResponse> createStadium(
+            @Valid @RequestPart(value = "json") StadiumCreateRequest request,
+            @RequestPart(value = "image") MultipartFile file
+    ) {
+        return ResponseEntity.ok(stadiumService.createStadium(request, file));
     }
 
     @PutMapping("/v1/stadiums/{stadiumId}")

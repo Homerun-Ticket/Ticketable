@@ -1,26 +1,29 @@
 package com.example.ticketable.domain.stadium.service;
 
+import static com.example.ticketable.common.exception.ErrorCode.SEAT_NOT_FOUND;
+
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.stadium.dto.request.SeatCreateRequest;
+import com.example.ticketable.domain.stadium.dto.request.SeatHoldRequest;
 import com.example.ticketable.domain.stadium.dto.request.SeatUpdateRequest;
 import com.example.ticketable.domain.stadium.dto.response.SeatCreateResponse;
-import com.example.ticketable.domain.stadium.dto.response.SeatGetResponse;
 import com.example.ticketable.domain.stadium.dto.response.SeatUpdateResponse;
 import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.stadium.entity.Section;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.repository.SeatRepository;
+import com.example.ticketable.domain.ticket.service.TicketSeatService;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeatService {
@@ -30,6 +33,10 @@ public class SeatService {
     private final SectionService sectionService;
 
     private final StadiumService stadiumService;
+
+    private final SeatHoldRedisUtil seatHoldRedisUtil;
+
+    private final TicketSeatService ticketSeatService;
 
     @Transactional
     public List<SeatCreateResponse> createSeats(Long stadiumId, Long sectionId, SeatCreateRequest request) {
@@ -72,24 +79,6 @@ public class SeatService {
         return seatList;
     }
 
-    public List<SeatGetResponse> getSeats(Long sectionId) {
-        List<Seat> seatList = seatRepository.findBySectionId(sectionId);
-        List<Seat> unbookSeatList = seatRepository.findUnbookSeatsBySectionId(sectionId);
-
-        Set<Long> unbookedSeatIds = new HashSet<>();
-        for (Seat seat : unbookSeatList) {
-                unbookedSeatIds.add(seat.getId());
-        }
-
-        List<SeatGetResponse> responseList = new ArrayList<>();
-        for (Seat seat : seatList) {
-            boolean isBooked = !unbookedSeatIds.contains(seat.getId());
-            SeatGetResponse response = SeatGetResponse.of(seat, isBooked);
-            responseList.add(response);
-        }
-        return responseList;
-    }
-
     @Transactional
     public SeatUpdateResponse updateSeat(Long seatId, SeatUpdateRequest request) {
         Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new ServerException(ErrorCode.SEAT_NOT_FOUND));
@@ -111,4 +100,17 @@ public class SeatService {
 
 
     // PRICE
+    public List<Seat> getAllSeatEntity(List<Long> seatIds) {
+        List<Seat> seats = seatRepository.findAllByIds(seatIds);
+        if (seats.size() != seatIds.size()) {
+            log.debug("요청한 좌석을 찾을 수 없습니다.");
+            throw new ServerException(SEAT_NOT_FOUND);
+        }
+        return seats;
+    }
+
+    public void holdSeat(Auth auth, SeatHoldRequest seatHoldRequest) {
+        ticketSeatService.checkDuplicateSeats(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId());
+        seatHoldRedisUtil.holdSeatAtomic(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
+    }
 }
