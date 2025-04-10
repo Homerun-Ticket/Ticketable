@@ -22,10 +22,10 @@
     $('#chargeBtn').click(function () {
         const amount = parseInt($('#chargeAmount').val());
 
-        // if (!amount || amount < 1000) {
-        //     alert('1000원 이상 입력해주세요.');
-        //     return;
-        // }
+        if (!amount || amount < 1000) {
+            alert('1000원 이상 입력해주세요.');
+            return;
+        }
 
         // ✅ 결제창 띄우기
         IMP.init(impCode);
@@ -47,7 +47,8 @@
                         'Authorization': token
                     },
                 }).done(function (rsp) {
-                    alert('결제가 완료되었습니다!\n결제금액: ' + rsp.price + '원');
+                    console.log(rsp)
+                    alert('결제가 완료되었습니다!\n결제금액: ' + rsp.response.amount + '원');
                     location.reload();
                 }).fail(function () {
                     alert('결제는 되었지만 서버 검증에 실패했습니다.');
