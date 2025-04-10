@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -67,5 +63,25 @@ public class Auction extends Timestamped {
 	public void updateBid(Member bidder, Integer bidPoint) {
 		this.bidder = bidder;
 		this.bidPoint = bidPoint;
+	}
+
+	public boolean isBidPointChanged(Integer currentBidPoint) {
+		return !this.bidPoint.equals(currentBidPoint);
+	}
+
+	public boolean isTimeOver() {
+		return this.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now());
+	}
+
+	public boolean isSameSellerAndBidder(Member bidder) {
+		return this.seller.equals(bidder);
+	}
+
+	public boolean hasBidder() {
+		return this.bidder != null;
+	}
+
+	public boolean isNotOwner(Member requestMember) {
+		return !this.seller.equals(requestMember);
 	}
 }

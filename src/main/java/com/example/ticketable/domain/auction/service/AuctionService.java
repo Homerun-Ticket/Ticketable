@@ -5,11 +5,10 @@ import static com.example.ticketable.common.exception.ErrorCode.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.ticketable.domain.auction.dto.AuctionTicketInfoDto;
 import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
-import com.example.ticketable.domain.auction.entity.AuctionHistory;
 import com.example.ticketable.domain.auction.entity.AuctionTicketInfo;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,26 +37,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuctionService {
 
-	private static final int BID_UNIT = 100;
+	public static final int BID_UNIT = 100;
 
 	private final MemberRepository memberRepository;
 	private final TicketRepository ticketRepository;
 	private final AuctionRepository auctionRepository;
 	private final AuctionHistoryRepository auctionHistoryRepository;
 	private final AuctionTicketInfoRepository auctionTicketInfoRepository;
+
 	private final PointService pointService;
+	private final AuctionTicketInfoService auctionTicketInfoService;
+	private final AuctionHistoryService auctionHistoryService;
 
 	@Transactional
 	public AuctionResponse createAuction(Auth auth, AuctionCreateRequest dto) {
 		Ticket ticket = findTicket(dto);
 
-		if (ticket.getGame().getStartTime().minusHours(24).isBefore(LocalDateTime.now())) {
+		if (ticket.isTimeOverToAuction()) {
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
 		Member seller = findMember(auth);
 
-		if (!ticket.getMember().equals(seller)) {
+		if (ticket.isNotOwner(seller)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
@@ -65,23 +67,14 @@ public class AuctionService {
 			throw new ServerException(AUCTION_DUPLICATION);
 		}
 
-		AuctionTicketInfoDto ticketInfo = auctionRepository.findTicketInfo(ticket);
-
-		AuctionTicketInfo auctionTicketInfo = AuctionTicketInfo.builder()
-			.standardPoint(ticketInfo.getStandardPoint())
-			.sectionInfo(ticketInfo.getSectionInfo())
-			.seatInfo(ticketInfo.getSeatInfo())
-			.seatCount(ticketInfo.getSeatCount())
-			.isTogether(ticketInfo.getIsTogether())
-			.build();
-
-		AuctionTicketInfo savedAuctionTicketInfo = auctionTicketInfoRepository.save(auctionTicketInfo);
+		AuctionTicketInfo auctionTicketInfo = auctionTicketInfoService.createAuctionTicketInfo(ticket);
 
 		Auction auction = Auction.builder()
 			.seller(seller)
 			.ticket(ticket)
 			.startPoint(dto.getStartPoint())
-			.auctionTicketInfo(savedAuctionTicketInfo)
+			.bidPoint(dto.getStartPoint())
+			.auctionTicketInfo(auctionTicketInfo)
 			.build();
 
 		Auction savedAuction = auctionRepository.save(auction);
@@ -96,39 +89,45 @@ public class AuctionService {
 
 	@Transactional(readOnly = true)
 	public PagedModel<AuctionResponse> getAuctions(AuctionSearchCondition dto, Pageable pageable) {
-		return auctionRepository.findByConditions(dto, pageable);
+		Page<Auction> pages = auctionRepository.findByConditions(dto, pageable);
+		return new PagedModel<>(pages.map(AuctionResponse::of));
 	}
 
 	@Transactional
 	public AuctionResponse bidAuction(Auth auth, Long auctionId, AuctionBidRequest dto) {
 
-		pointService.decreasePoint(auth.getId(), dto.getBidPoint(), PointHistoryType.BID);
+		// 1. 경매 조회
+		Auction auction = findAuctionForBid(auctionId);
 
-		Auction auction = findAuction(auctionId);
+		// 2. 입찰자가 눈으로 확인한 금액과, 실제 입찰가가 맞지 않는 경우 예외처리
+		if (auction.isBidPointChanged(dto.getCurrentBidPoint())) {
+			throw new ServerException(INVALID_BIDDING_AMOUNT);
+		}
 
-		if (auction.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now())) {
+		// 3. 입찰자 포인트 확인 및 회수
+		pointService.decreasePoint(auth.getId(), dto.getCurrentBidPoint() + BID_UNIT, PointHistoryType.BID);
+
+		// 4. 경매가 종료된 경우 예외처리
+		if (auction.isTimeOver()) {
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
+		// 5. 경매 등록자와 입찰자가 같은 경우 예외처리
 		Member bidder = findMember(auth);
-
-		if (auction.getSeller().equals(bidder)) {
+		if (auction.isSameSellerAndBidder(bidder)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
-		AuctionHistory auctionHistory = AuctionHistory.builder()
-			.auction(auction)
-			.bidder(bidder)
-			.point(dto.getBidPoint())
-			.build();
+		// 6~7. 해당 경매기록에서, 가격이 같은 기록이 존재하면 예외처리 + 경매기록 저장
+		auctionHistoryService.createAuctionHistory(auction, bidder, dto);
 
-		auctionHistoryRepository.save(auctionHistory);
-
-		if (auction.getBidder() != null) {
+		// 8. 이전 입찰자에게 입찰금 환급
+		if (auction.hasBidder()) {
 			pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
 		}
 
-		auction.updateBid(bidder, dto.getBidPoint() + BID_UNIT);
+		// 9. 입찰내용 업데이트
+		auction.updateBid(bidder, auction.getBidPoint() + BID_UNIT);
 
 		return AuctionResponse.of(auction);
 	}
@@ -137,13 +136,13 @@ public class AuctionService {
 	public void deleteAuction(Auth auth, Long auctionId) {
 		Auction auction = findAuction(auctionId);
 
-		if (auction.getBidder() != null) {
+		if (auction.hasBidder()) {
 			throw new ServerException(EXIST_BID);
 		}
 
 		Member requestMember = findMember(auth);
 
-		if (!auction.getSeller().equals(requestMember)) {
+		if (auction.isNotOwner(requestMember)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
@@ -151,7 +150,12 @@ public class AuctionService {
 	}
 
 	private Auction findAuction(Long auctionId) {
-		return auctionRepository.findByIdAndDeletedAtIsNull(auctionId)
+		return auctionRepository.findByIdAndDeletedAtIsNullWithFetchJoin(auctionId)
+			.orElseThrow(() -> new ServerException(AUCTION_NOT_FOUND));
+	}
+
+	private Auction findAuctionForBid(Long auctionId) {
+		return auctionRepository.findByIdWithPessimisticLock(auctionId)
 			.orElseThrow(() -> new ServerException(AUCTION_NOT_FOUND));
 	}
 
@@ -184,7 +188,7 @@ public class AuctionService {
 			}
 
 			// 낙찰자 혹은 현재 최고 입찰자 환불
-			if (auction.getBidder() != null) {
+			if (auction.hasBidder()) {
 				pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
 			}
 
@@ -193,6 +197,7 @@ public class AuctionService {
 		}
 	}
 
+	// 경매 종료 스케쥴러
 	@Scheduled(fixedRate = 60000) // 1분마다 실행
 	@Transactional
 	public void closeExpiredAuctions() {
@@ -209,7 +214,7 @@ public class AuctionService {
 		for (Auction auction : expiredAuctions) {
 			auction.setDeletedAt();
 
-			if (auction.getBidder() != null) {
+			if (auction.hasBidder()) {
 				pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
 				auction.getTicket().changeOwner(auction.getBidder());
 			}

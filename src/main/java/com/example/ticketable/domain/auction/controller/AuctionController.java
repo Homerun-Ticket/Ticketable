@@ -7,6 +7,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -55,7 +56,7 @@ public class AuctionController {
 	}
 
 	@PostMapping("/v1/auctions/{auctionId}")
-	public ResponseEntity<AuctionResponse> bidAuction(
+	public ResponseEntity<AuctionResponse> bidAuctionV1(
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long auctionId,
 		@Valid @RequestBody AuctionBidRequest dto
