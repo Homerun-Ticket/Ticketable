@@ -23,6 +23,17 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
+      # Gradle 캐시 설정 (의존성 및 빌드 캐시 재사용)
+      - name: Gradle dependencies caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # Gradle wrapper 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
