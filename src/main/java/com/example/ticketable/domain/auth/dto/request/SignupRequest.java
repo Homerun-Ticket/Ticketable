@@ -27,4 +27,8 @@ public class SignupRequest {
 	
 	@NotNull(message = "역할을 입력해주세요.")
 	private String role;
+	
+	public boolean validRePassword() {
+		return this.password.equals(this.rePassword);
+	}
 }

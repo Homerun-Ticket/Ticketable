@@ -36,7 +36,7 @@ public class Point {
 	}
 	
 	public void minusPoint(Integer charge) {
-		if ((this.point - charge) < 0) {
+		if (this.point < charge) {
 			throw new ServerException(NOT_ENOUGH_POINT);
 		}
 		this.point -= charge;

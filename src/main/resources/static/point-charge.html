@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>포인트 충전</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+</head>
+<body>
+<h2>포인트 충전</h2>
+
+<!-- 금액 입력 -->
+<label for="chargeAmount">충전할 금액 (₩): </label>
+<input type="number" id="chargeAmount" min="1000" step="1000" placeholder="예: 10000"><br><br>
+
+<!-- 충전 버튼 -->
+<button id="chargeBtn">충전하기</button>
+
+<script th:inline="javascript">
+    var impCode = 'imp67846427';
+
+    $('#chargeBtn').click(function () {
+        const amount = parseInt($('#chargeAmount').val());
+
+        if (!amount || amount < 1000) {
+            alert('1000원 이상 입력해주세요.');
+            return;
+        }
+
+        // ✅ 결제창 띄우기
+        IMP.init(impCode);
+        IMP.request_pay({
+            pg: 'html5_inicis.INIpayTest', // 테스트용 PG사
+            pay_method: 'card',
+            merchant_uid: 'order_' + new Date().getTime(),
+            name: '포인트 충전',
+            amount: amount,
+            buyer_email: /*[[${user.email}]]*/ 'test@example.com' // 서버에서 전달되면 교체됨
+        }, function (rsp) {
+            if (rsp.success) {
+                const token = localStorage.getItem("Authorization");
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/v1/payments/' + rsp.imp_uid,
+                    headers: {
+                        'Authorization': token
+                    },
+                }).done(function (rsp) {
+                    console.log(rsp)
+                    alert('결제가 완료되었습니다!\n결제금액: ' + rsp.response.amount + '원');
+                    location.reload();
+                }).fail(function () {
+                    alert('결제는 되었지만 서버 검증에 실패했습니다.');
+                });
+            } else {
+                alert('결제가 실패했습니다: ' + rsp.error_msg);
+            }
+        });
+    });
+</script>
+</body>
+</html>
