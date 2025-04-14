@@ -36,4 +36,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 	List<Auction> findAllByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
 
 	boolean existsByTicket(Ticket ticket);
+
+	boolean existsByTicketAndDeletedAtIsNull(Ticket ticket);
 }

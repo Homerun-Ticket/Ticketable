@@ -50,4 +50,12 @@ public class Ticket {
 	public void changeOwner(Member targetMember) {
 		this.member = targetMember;
 	}
+
+	public boolean isTimeOverToAuction() {
+		return this.game.getStartTime().minusHours(24).isBefore(LocalDateTime.now());
+	}
+
+	public boolean isNotOwner(Member seller) {
+		return !this.member.equals(seller);
+	}
 }

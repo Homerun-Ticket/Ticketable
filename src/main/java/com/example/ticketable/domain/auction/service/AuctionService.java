@@ -57,14 +57,18 @@ public class AuctionService {
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
+		if (auctionRepository.existsByTicketAndDeletedAtIsNull(ticket)) {
+			throw new ServerException(AUCTION_DUPLICATION);
+		}
+
+		if (auctionHistoryRepository.existsByAuction_Ticket(ticket)) {
+			throw new ServerException(AUCTION_ACCESS_DENIED);
+		}
+
 		Member seller = findMember(auth);
 
 		if (ticket.isNotOwner(seller)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
-		}
-
-		if (auctionRepository.existsByTicket(ticket)) {
-			throw new ServerException(AUCTION_DUPLICATION);
 		}
 
 		AuctionTicketInfo auctionTicketInfo = auctionTicketInfoService.createAuctionTicketInfo(ticket);
