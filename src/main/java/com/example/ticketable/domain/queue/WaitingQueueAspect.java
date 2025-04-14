@@ -28,6 +28,7 @@ public class WaitingQueueAspect {
 
 		String token = request.getHeader("waiting-token");
 
+		//토큰 값이 존재한다면 입장 가능한지 체크
 		if(token!= null && queueManager.isAllowed(token)) {
 			Object proceed = joinPoint.proceed();
 			queueManager.removeTokenFromProceedQueue(token);
@@ -37,6 +38,7 @@ public class WaitingQueueAspect {
 				token = queueManager.enterWaitingQueue();
 			}
 			long waitingOrder = queueManager.getWaitingOrder(token);
+			queueManager.moveWaitingToProceedAtomic();
 			return ResponseEntity.accepted().body(new WaitingResponse(waitingOrder,"wait" , token));
 		}
 	}

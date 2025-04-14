@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class WaitingQueueService {
 	private final StringRedisTemplate stringRedisTemplate;
 
+	//대기열 입장 후 토큰 반환
 	public String enterWaitingQueue() {
 		String token = UUID.randomUUID().toString();
 		long now = System.currentTimeMillis();
@@ -20,12 +21,14 @@ public class WaitingQueueService {
 		return token;
 	}
 
+	//대기열 순서 조회
 	public long getOrder(String token) {
 		Long rank = stringRedisTemplate.opsForZSet().rank(RedisConst.WAITING_KEY, token);
 		return rank == null ? -1 : rank+1;
 	}
 
-	public Set<TypedTuple<String>> popMin(long range) {
-		return stringRedisTemplate.opsForZSet().popMin(RedisConst.WAITING_KEY, range);
+	//count 만큼 대기열에서 pop
+	public Set<TypedTuple<String>> popMin(long count) {
+		return stringRedisTemplate.opsForZSet().popMin(RedisConst.WAITING_KEY, count);
 	}
 }
