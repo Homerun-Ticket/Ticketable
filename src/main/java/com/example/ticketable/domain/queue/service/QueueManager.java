@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -21,7 +22,7 @@ public class QueueManager {
 	private final ProceedQueueService proceedQueueService;
 	private final DefaultRedisScript<Long> moveWaitingToProceedScript;
 	private final StringRedisTemplate stringRedisTemplate;
-	private static final long CAPACITY = 50L;
+	private static final long CAPACITY = 100L;
 
 	//대기열 입장
 	public String enterWaitingQueue() {
@@ -49,22 +50,21 @@ public class QueueManager {
 		proceedQueueService.removeToken(token);
 	}
 
-	//동시성 문제 발생, 사용X
-	public void moveWaitingToProceed() {
-		long size = proceedQueueService.getSize();
-		long remain = CAPACITY - size;
-		if(remain > 0) {
-			Set<TypedTuple<String>> waitingList = waitingQueueService.popMin(remain);
-			if(!waitingList.isEmpty())
-				proceedQueueService.enterProceed(waitingList);
-		}
-	}
-
 	//대기열에서 작업열로 CAPACITY로부터 여분만큼 이동
 	public void moveWaitingToProceedAtomic() {
 		stringRedisTemplate.execute(moveWaitingToProceedScript,
 			List.of(RedisConst.WAITING_KEY, RedisConst.PROCEED_KEY),
 			String.valueOf(CAPACITY)
 		);
+	}
+
+	public void deleteTokenFromWaitingAndProceedQueue(String token) {
+		waitingQueueService.removeToken(token);
+		proceedQueueService.removeToken(token);
+	}
+
+	@Scheduled(fixedRate = 1000)
+	public void moveWaitingToProceedAtomicScheduled(){
+		moveWaitingToProceedAtomic();
 	}
 }

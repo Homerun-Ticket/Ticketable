@@ -10,6 +10,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -19,15 +20,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class WaitingQueueAspect {
 	private final QueueManager queueManager;
+	private final String WAITING_QUEUE_HEADER_NAME = "waiting-queue";
 
-	@Around("@annotation(com.example.ticketable.domain.queue.WaitingQueue)")
-	private Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-		HttpServletRequest request =
-			((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
+	@Around("@annotation(waitingQueue)")
+	private Object around(ProceedingJoinPoint joinPoint, WaitingQueue waitingQueue) throws Throwable {
+		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
+		HttpServletRequest request = ((ServletRequestAttributes) attributes).getRequest();
 
-		String token = request.getHeader("waiting-token");
-
+		String token = request.getHeader(WAITING_QUEUE_HEADER_NAME);
 		//토큰 값이 존재한다면 입장 가능한지 체크
 		if(token!= null && queueManager.isAllowed(token)) {
 			Object proceed = joinPoint.proceed();
@@ -38,7 +38,6 @@ public class WaitingQueueAspect {
 				token = queueManager.enterWaitingQueue();
 			}
 			long waitingOrder = queueManager.getWaitingOrder(token);
-			queueManager.moveWaitingToProceedAtomic();
 			return ResponseEntity.accepted().body(new WaitingResponse(waitingOrder,"wait" , token));
 		}
 	}
