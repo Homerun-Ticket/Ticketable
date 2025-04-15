@@ -3,14 +3,8 @@ package com.example.ticketable.domain.queue.service;
 import static com.example.ticketable.common.exception.ErrorCode.INVALID_WAITING_TOKEN;
 
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.domain.queue.RedisConst;
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +14,7 @@ import org.springframework.stereotype.Component;
 public class QueueManager {
 	private final WaitingQueueService waitingQueueService;
 	private final ProceedQueueService proceedQueueService;
-	private final DefaultRedisScript<Long> moveWaitingToProceedScript;
-	private final StringRedisTemplate stringRedisTemplate;
-	private static final long CAPACITY = 100L;
+	private static final long PROCEED_QUEUE_TARGET_SIZE = 100L;
 
 	//대기열 입장
 	public String enterWaitingQueue() {
@@ -50,14 +42,6 @@ public class QueueManager {
 		proceedQueueService.removeToken(token);
 	}
 
-	//대기열에서 작업열로 CAPACITY로부터 여분만큼 이동
-	public void moveWaitingToProceedAtomic() {
-		stringRedisTemplate.execute(moveWaitingToProceedScript,
-			List.of(RedisConst.WAITING_KEY, RedisConst.PROCEED_KEY),
-			String.valueOf(CAPACITY)
-		);
-	}
-
 	public void deleteTokenFromWaitingAndProceedQueue(String token) {
 		waitingQueueService.removeToken(token);
 		proceedQueueService.removeToken(token);
@@ -65,6 +49,6 @@ public class QueueManager {
 
 	@Scheduled(fixedRate = 1000)
 	public void moveWaitingToProceedAtomicScheduled(){
-		moveWaitingToProceedAtomic();
+		proceedQueueService.pullFromWaitingQueue(PROCEED_QUEUE_TARGET_SIZE);
 	}
 }
