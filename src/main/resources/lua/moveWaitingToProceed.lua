@@ -9,13 +9,16 @@ if remain <= 0 then
     return 0
 end
 
-local entries = redis.call('ZRANGE', waitingKey, 0, remain - 1, 'WITHSCORES')
+local entries = redis.call('ZRANGE', waitingKey, 0, remain - 1)
 if #entries == 0 then
     return 0
 end
 
-for i = 1, #entries, 2 do
-    redis.call('ZADD', proceedKey, entries[i+1], entries[i])
+local now = redis.call('TIME')  -- [seconds, microseconds]
+local timestamp = now[1] * 1000 + math.floor(now[2] / 1000)
+
+for i = 1, #entries do
+    redis.call('ZADD', proceedKey, timestamp, entries[i])
     redis.call('ZREM', waitingKey, entries[i])
 end
 
