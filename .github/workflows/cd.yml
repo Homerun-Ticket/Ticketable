@@ -74,6 +74,7 @@ jobs:
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $AWS_REGISTRY/repo-ticketable:$SHORT_SHA \
+            -t $AWS_REGISTRY/repo-ticketable:latest \
             --push .
 
       # EC2에 SSH 로 접속해 배포 수행
