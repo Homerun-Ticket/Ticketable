@@ -27,7 +27,7 @@ public class QueueManager {
 		boolean isProceed = proceedQueueService.isContains(token);
 		//대기열, 작업열 에 존재하지않으면 잘못된 토큰
 		if(waitingOrder == -1 && !isProceed) {
-			log.info("token is : {}", token);
+			log.warn("{} : {}", INVALID_WAITING_TOKEN.getMessage(), token);
 			throw new ServerException(INVALID_WAITING_TOKEN);
 		}
 		return waitingOrder;
