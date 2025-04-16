@@ -23,7 +23,6 @@ repositories {
     mavenCentral()
 
     // IamPort
-    mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
@@ -63,6 +62,12 @@ dependencies {
 
     // thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Prometheus
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

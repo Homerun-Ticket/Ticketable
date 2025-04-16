@@ -41,6 +41,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/login.html").permitAll()
 				.requestMatchers("/point-charge.html").permitAll()
+				.requestMatchers("/actuator/**").permitAll()
 				.requestMatchers("/api/v1/auth/**").permitAll()
 				.requestMatchers(HttpMethod.GET,"/api/v1/games/**").authenticated()
 				.requestMatchers("/api/v1/games/**").hasAuthority(MemberRole.Authority.ADMIN)
