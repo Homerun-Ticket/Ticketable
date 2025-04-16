@@ -3,6 +3,7 @@ package com.example.ticketable.domain.queue.service;
 import static com.example.ticketable.common.exception.ErrorCode.INVALID_WAITING_TOKEN;
 
 import com.example.ticketable.common.exception.ServerException;
+import com.example.ticketable.domain.queue.QueueSystemConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 public class QueueManager {
 	private final WaitingQueueService waitingQueueService;
 	private final ProceedQueueService proceedQueueService;
-	private static final long PROCEED_QUEUE_TARGET_SIZE = 100L;
 
 	//대기열 입장
 	public String enterWaitingQueue() {
@@ -49,6 +49,11 @@ public class QueueManager {
 
 	@Scheduled(fixedRate = 1000)
 	public void moveWaitingToProceedAtomicScheduled(){
-		proceedQueueService.pullFromWaitingQueue(PROCEED_QUEUE_TARGET_SIZE);
+		proceedQueueService.pullFromWaitingQueue(QueueSystemConstants.PROCEED_QUEUE_TARGET_SIZE);
+	}
+
+	@Scheduled(fixedRate = 10000)
+	public void removeExpiredTokenFromProceedQueue(){
+		proceedQueueService.removeExpiredTokens();
 	}
 }
