@@ -2,23 +2,29 @@
 name: CD
 
 # main 브랜치로 PR이 닫힐 때 실행
+#on:
+#  pull_request:
+#    branches: ["main"]
+#    types: [closed]
+
+# test/cicd 브랜치에 푸시할 때 실행
 on:
-  pull_request:
-    branches: ["main"]
-    types: [closed]
+  push:
+    branches: ["test/cicd"]
 
 # CD 작업 정의
 jobs:
   deploy:
     # PR이 merge 된 경우에만 실행
-    if: github.event.pull_request.merged == true
+#    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest    # Ubuntu 최신 버전에서 실행
     steps:
       # main 브랜치의 최신 상태로 체크아웃
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: test/cicd
+#          ref: main
 
       # JDK 17 환경 설정 (Corretto 사용)
       - name: Set up JDK 17
