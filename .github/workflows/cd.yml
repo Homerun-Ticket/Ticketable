@@ -70,14 +70,14 @@ jobs:
       - name: Build and Push Docker Image to ECR
         env:
           AWS_REGISTRY: ${{ secrets.AWS_REGISTRY }}
-          SHORT_SHA: ${{ github.sha::8 }}
         run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
           docker buildx create --use
           docker buildx build \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t $AWS_REGISTRY/repo-ticketable:$SHORT_SHA \
-            -t $AWS_REGISTRY/repo-ticketable:latest \
+            -t $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA \
+            -t $AWS_REGISTRY/repo-ticketable:test-latest \
             --push .
 
       # EC2에 SSH 로 접속해 배포 수행
@@ -85,14 +85,14 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           AWS_REGISTRY: ${{ secrets.AWS_REGISTRY }}
-          SHORT_SHA: ${{ github.sha::8 }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."                                  # 배포 시작 로그
-            docker pull $AWS_REGISTRY/repo-ticketable:$SHORT_SHA
+            SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
+            docker pull $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA
             docker stop ticketable_web || true                             # 기존 컨테이너 중지 없으면 무시
             docker rm ticketable_web || true                               # 기존 컨테이너 삭제 없으면 무시
             # 새 컨테이너 실행
@@ -103,5 +103,6 @@ jobs:
               -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
               -e JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN }} \
-              $AWS_REGISTRY/repo-tiketable:$SHORT_SHA                     # 도커 이미지 실행
+              $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA                     # 도커 이미지 실행
             echo "Deployment successful!"                                 # 배포 완료 로그
+            docker logs ticketable_web                                    # 컨테이너 로그 출력
