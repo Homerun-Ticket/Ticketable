@@ -30,8 +30,11 @@ public class TicketController {
 	}
 
 	@GetMapping("/v1/tickets/{ticketId}")
-	public ResponseEntity<TicketResponse> getTicket(@PathVariable Long ticketId) {
-		TicketResponse ticketResponse = ticketService.getTicket(ticketId);
+	public ResponseEntity<TicketResponse> getTicket(
+		@AuthenticationPrincipal Auth auth,
+		@PathVariable Long ticketId
+	) {
+		TicketResponse ticketResponse = ticketService.getTicket(auth, ticketId);
 		return ResponseEntity.ok(ticketResponse);
 	}
 
