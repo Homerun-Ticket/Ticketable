@@ -2,7 +2,6 @@ package com.example.ticketable.domain.auction.service;
 
 import static com.example.ticketable.common.exception.ErrorCode.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -123,6 +122,7 @@ public class AuctionService {
 
 		// 4. 경매가 종료된 경우 예외처리
 		if (auction.isTimeOver()) {
+			expireAuction(auction);
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
@@ -188,6 +188,15 @@ public class AuctionService {
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 	}
 
+	private void expireAuction(Auction auction) {
+		auction.setDeletedAt();
+
+		if (auction.hasBidder()) {
+			pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
+			auction.getTicket().changeOwner(auction.getBidder());
+		}
+	}
+
 	/*
 	 * 경기 취소 시 로직
 	 * 최종 낙찰자에 대한 포인트 환불 + 판매자 포인트 회수
@@ -201,15 +210,7 @@ public class AuctionService {
 		}
 
 		for (Auction auction : auctions) {
-			// 경매 중인 경우, 경매 강제 종료 처리 (소프트딜리트)
-			if (auction.getDeletedAt() == null){
-				auction.setDeletedAt();
-			}
-
-			// 낙찰자 혹은 현재 최고 입찰자 환불
-			if (auction.hasBidder()) {
-				pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
-			}
+			expireAuction(auction);
 
 			// 티켓 원래 주인 경매금액 뺏기
 			pointService.decreasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
@@ -230,18 +231,12 @@ public class AuctionService {
 			standardTime.minusMinutes(60), standardTime, pageable
 		);
 
-
 		if (expiredAuctions.isEmpty()) {
 			return;
 		}
 
 		for (Auction auction : expiredAuctions.getContent()) {
-			auction.setDeletedAt();
-
-			if (auction.hasBidder()) {
-				pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
-				auction.getTicket().changeOwner(auction.getBidder());
-			}
+			expireAuction(auction);
 		}
 	}
 }

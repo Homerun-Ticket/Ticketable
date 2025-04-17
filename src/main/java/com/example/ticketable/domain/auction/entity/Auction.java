@@ -61,7 +61,9 @@ public class Auction extends Timestamped {
 	}
 
 	public void setDeletedAt() {
-		this.deletedAt = LocalDateTime.now();
+		if (this.deletedAt == null) {
+			this.deletedAt = LocalDateTime.now();
+		}
 	}
 
 	public void updateBid(Member bidder, Integer bidPoint) {
