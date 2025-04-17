@@ -30,7 +30,7 @@ public class GameController {
     public ResponseEntity<GameCreateResponse> createGame(
             @Valid @RequestPart(value = "json") GameCreateRequest request,
             @RequestPart(value = "image") MultipartFile file
-            ) {
+    ) {
         return ResponseEntity.ok(gameService.createGame(request, file));
     }
 
@@ -38,16 +38,38 @@ public class GameController {
     public ResponseEntity<List<GameGetResponse>> getGames(
             @RequestParam (required = false) String team,
             @RequestParam (required = false) LocalDateTime date
-            ) {
+    ) {
         return ResponseEntity.ok(gameService.getGames(team, date));
+    }
+
+    @GetMapping("/v0/games/{gameId}")
+    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV0(
+            @PathVariable Long gameId
+    ) {
+        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV0(gameId));
     }
 
     @GetMapping("/v1/games/{gameId}")
     public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCounts(
             @PathVariable Long gameId
     ) {
-        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCounts(gameId));
+        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV1(gameId));
     }
+
+    @GetMapping("/v2/games/{gameId}")
+    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV2(
+            @PathVariable Long gameId
+    ) {
+        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV2(gameId));
+    }
+
+    @GetMapping("/v3/games/{gameId}")
+    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV3(
+            @PathVariable Long gameId
+    ) {
+        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV3(gameId));
+    }
+
 
     @GetMapping("/v1/games/{gameId}/sectionTypes")
     public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionType(
@@ -75,7 +97,7 @@ public class GameController {
 
     @DeleteMapping("/v1/games/{gameId}")
     public ResponseEntity<Void> deleteGame(
-        @PathVariable Long gameId
+            @PathVariable Long gameId
     ) {
         gameService.deleteGames(gameId);
         return ResponseEntity.ok().build();
