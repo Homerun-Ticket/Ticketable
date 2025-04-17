@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Table(name = "auction", indexes = {
+	@Index(name = "idx_deletedAt", columnList = "deletedAt"),
+	@Index(name = "idx_deletedAt_createdAt", columnList = "deletedAt, createdAt")
+})
 public class Auction extends Timestamped {
 
 	@Id
