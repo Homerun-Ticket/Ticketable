@@ -4,7 +4,6 @@ import static com.example.ticketable.common.exception.ErrorCode.GAME_NOT_FOUND;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
 import com.example.ticketable.domain.member.entity.Member;
@@ -14,6 +13,7 @@ import com.example.ticketable.domain.ticket.dto.TicketContext;
 import com.example.ticketable.domain.ticket.dto.request.TicketCreateRequest;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.example.ticketable.domain.ticket.repository.TicketRepository;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
