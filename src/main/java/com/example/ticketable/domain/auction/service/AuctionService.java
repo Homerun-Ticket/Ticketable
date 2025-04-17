@@ -2,9 +2,11 @@ package com.example.ticketable.domain.auction.service;
 
 import static com.example.ticketable.common.exception.ErrorCode.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.ticketable.common.util.AuctionBidRedisUtil;
 import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
 import com.example.ticketable.domain.auction.entity.AuctionTicketInfo;
 
@@ -50,6 +52,7 @@ public class AuctionService {
 	private final PointService pointService;
 	private final AuctionTicketInfoService auctionTicketInfoService;
 	private final AuctionHistoryService auctionHistoryService;
+	private final AuctionBidRedisUtil auctionBidRedisUtil;
 
 	@Transactional
 	public AuctionResponse createAuction(Auth auth, AuctionCreateRequest dto) {
@@ -85,6 +88,8 @@ public class AuctionService {
 
 		Auction savedAuction = auctionRepository.save(auction);
 
+		auctionBidRedisUtil.createBidKey(savedAuction);
+
 		return AuctionResponse.of(savedAuction);
 	}
 
@@ -101,6 +106,9 @@ public class AuctionService {
 
 	@Transactional
 	public AuctionResponse bidAuction(Auth auth, Long auctionId, AuctionBidRequest dto) {
+
+		// 0. Redis 사전 검증
+		auctionBidRedisUtil.validateBid(auctionId, dto.getCurrentBidPoint());
 
 		// 1. 경매 조회
 		Auction auction = findAuctionForBid(auctionId);
@@ -135,6 +143,9 @@ public class AuctionService {
 		// 9. 입찰내용 업데이트
 		auction.updateBid(bidder, auction.getBidPoint() + BID_UNIT);
 
+		// 10. Redis 최신 입찰가 반영
+		auctionBidRedisUtil.updateBidKey(auctionId, auction.getBidPoint() + BID_UNIT);
+
 		return AuctionResponse.of(auction);
 	}
 
@@ -151,6 +162,8 @@ public class AuctionService {
 		if (auction.isNotOwner(requestMember)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
+
+		auctionBidRedisUtil.deleteBidKey(auctionId);
 
 		auction.setDeletedAt();
 	}
@@ -200,6 +213,8 @@ public class AuctionService {
 
 			// 티켓 원래 주인 경매금액 뺏기
 			pointService.decreasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
+
+			auctionBidRedisUtil.deleteBidKey(auction.getId());
 		}
 	}
 
