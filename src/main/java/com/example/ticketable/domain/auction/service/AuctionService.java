@@ -9,6 +9,7 @@ import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
 import com.example.ticketable.domain.auction.entity.AuctionTicketInfo;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionService {
 
 	public static final int BID_UNIT = 100;
+	private static final int CHUNK_SIZE = 1000;
 
 	private final MemberRepository memberRepository;
 	private final TicketRepository ticketRepository;
@@ -205,17 +207,20 @@ public class AuctionService {
 	@Scheduled(fixedRate = 60000) // 1분마다 실행
 	@Transactional
 	public void closeExpiredAuctions() {
+		Pageable pageable = PageRequest.of(0, CHUNK_SIZE);
+
 		LocalDateTime standardTime = LocalDateTime.now().minusHours(24);
 
-		List<Auction> expiredAuctions = auctionRepository.findAllByCreatedAtBetweenAndDeletedAtIsNull(
-			standardTime.minusMinutes(60), standardTime
+		Page<Auction> expiredAuctions = auctionRepository.findAllByDeletedAtIsNullAndCreatedAtBetween(
+			standardTime.minusMinutes(60), standardTime, pageable
 		);
+
 
 		if (expiredAuctions.isEmpty()) {
 			return;
 		}
 
-		for (Auction auction : expiredAuctions) {
+		for (Auction auction : expiredAuctions.getContent()) {
 			auction.setDeletedAt();
 
 			if (auction.hasBidder()) {

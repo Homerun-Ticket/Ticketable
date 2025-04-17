@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -32,10 +34,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 		"     WHERE a.id = :id AND a.deletedAt is null")
 	Optional<Auction> findByIdWithPessimisticLock(@Param("id") Long id);
 
-	@EntityGraph(attributePaths = {"seller", "bidder", "ticket"})
-	List<Auction> findAllByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
-
-	boolean existsByTicket(Ticket ticket);
-
 	boolean existsByTicketAndDeletedAtIsNull(Ticket ticket);
+
+	@EntityGraph(attributePaths = {"seller", "bidder", "ticket"})
+	Page<Auction> findAllByDeletedAtIsNullAndCreatedAtBetween(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore, Pageable pageable);
 }
