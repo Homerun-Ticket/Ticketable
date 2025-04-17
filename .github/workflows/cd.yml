@@ -89,24 +89,37 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           AWS_REGISTRY: ${{ secrets.AWS_REGISTRY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SHORT_SHA: ${{ github.sha }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_ACCESS_TOKEN: ${{ secrets.JWT_ACCESS_TOKEN }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."                                  # 배포 시작 로그
-            SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
-            docker pull $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA
+            echo "AWS_REGISTRY: $AWS_REGISTRY"
+            echo "AWS_REGION: $AWS_REGION"
+            echo "SHORT_SHA: $SHORT_SHA"
+            IMAGE_TAG="test-$(echo $SHORT_SHA | cut -c1-8)"
+            IMAGE_NAME="$AWS_REGISTRY/repo-ticketable:$IMAGE_TAG"
+            echo "Pulling image: $IMAGE_NAME"
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_REGISTRY || { echo "ECR login failed"; exit 1; }
+            docker pull $IMAGE_NAME || { echo "Failed to pull image"; exit 1; }
             docker stop ticketable_web || true                             # 기존 컨테이너 중지 없으면 무시
             docker rm ticketable_web || true                               # 기존 컨테이너 삭제 없으면 무시
             # 새 컨테이너 실행
             docker run -d --name ticketable_web \
               -p 80:8080 \                                                 # 호스트 80 포트를 컨테이너 8080 포트에 매핑
-              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN }} \
-              $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA                     # 도커 이미지 실행
+              --env SPRING_DATASOURCE_URL="$DB_URL" \
+              --env SPRING_DATASOURCE_USERNAME="$DB_USERNAME" \
+              --env SPRING_DATASOURCE_PASSWORD="$DB_PASSWORD" \
+              --env JWT_SECRET_KEY="$JWT_SECRET_KEY" \
+              --env JWT_ACCESS_EXPIRATION="$JWT_ACCESS_TOKEN" \
+              $IMAGE_NAME || { echo "Failed to run container"; exit 1; }
             echo "Deployment successful!"                                 # 배포 완료 로그
             docker logs ticketable_web                                    # 컨테이너 로그 출력
