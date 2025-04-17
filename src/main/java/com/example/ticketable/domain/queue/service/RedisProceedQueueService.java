@@ -3,17 +3,23 @@ package com.example.ticketable.domain.queue.service;
 import com.example.ticketable.domain.queue.QueueSystemConstants;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class RedisProceedQueueService implements ProceedQueueService {
 	private final ZSetOperations<String, String> proceedQueue;
-	private final StringRedisTemplate scriptRunner;
+	private final RedisTemplate<String, String> scriptRunner;
 	private final DefaultRedisScript<Long> moveWaitingToProceedScript;
+
+	public RedisProceedQueueService(RedisTemplate<String, String> redisTemplate, DefaultRedisScript<Long> moveWaitingToProceedScript) {
+		this.moveWaitingToProceedScript = moveWaitingToProceedScript;
+		this.proceedQueue = redisTemplate.opsForZSet();
+		this.scriptRunner = redisTemplate;
+	}
 
 	//토큰이 작업열에 존재하는지 확인
 	@Override

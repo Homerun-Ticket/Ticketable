@@ -3,13 +3,17 @@ package com.example.ticketable.domain.queue.service;
 import com.example.ticketable.domain.queue.QueueSystemConstants;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class RedisWaitingQueueService implements WaitingQueueService {
 	private final ZSetOperations<String, String> waitingQueue;
+
+	public RedisWaitingQueueService(RedisTemplate<String, String> redisTemplate) {
+		waitingQueue = redisTemplate.opsForZSet();
+	}
 
 	//대기열 입장 후 토큰 반환
 	@Override
