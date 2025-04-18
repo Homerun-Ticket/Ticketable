@@ -106,6 +106,7 @@ jobs:
             BUCKET_NAME="${{ secrets.BUCKET_NAME }}"
             REGION_VALUE="${{ secrets.REGION_VALUE }}"
             ACCESS_KEY="${{ secrets.ACCESS_KEY }}"
+            SECRET_KEY="${{ secrets.SECRET_KEY }}
             echo "AWS_REGISTRY: $AWS_REGISTRY"
             echo "AWS_REGION: $AWS_REGION"
             echo "SHORT_SHA: $SHORT_SHA"
@@ -129,7 +130,8 @@ jobs:
               --env IMPORT_API_SECRET="$IMPORT_API_SECRET" \
               --env BUCKET_NAME="$BUCKET_NAME" \
               --env REGION_VALUE="$REGION_VALUE" \
-              --env ACCESS_KEY="$ACCESS_KEY" \
+              --env spring.cloud.aws.credentials.access-key="$ACCESS_KEY" \
+              --env spring.cloud.aws.credentials.secret-key="$SECRET_KEY" \
               $IMAGE_NAME || { echo "Failed to run container"; exit 1; }
             echo "Deployment successful!"                                 # 배포 완료 로그
             docker logs ticketable_web                                    # 컨테이너 로그 출력
