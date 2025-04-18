@@ -106,7 +106,7 @@ jobs:
             BUCKET_NAME="${{ secrets.BUCKET_NAME }}"
             REGION_VALUE="${{ secrets.REGION_VALUE }}"
             ACCESS_KEY="${{ secrets.ACCESS_KEY }}"
-            SECRET_KEY="${{ secrets.SECRET_KEY }}
+            SECRET_KEY="${{ secrets.SECRET_KEY }}"
             echo "AWS_REGISTRY: $AWS_REGISTRY"
             echo "AWS_REGION: $AWS_REGION"
             echo "SHORT_SHA: $SHORT_SHA"
