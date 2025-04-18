@@ -87,33 +87,32 @@ jobs:
       # EC2에 SSH 로 접속해 배포 수행
       - name: SSH Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          AWS_REGISTRY: ${{ secrets.AWS_REGISTRY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          SHORT_SHA: ${{ github.sha }}
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-          JWT_ACCESS_TOKEN: ${{ secrets.JWT_ACCESS_TOKEN }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."                                  # 배포 시작 로그
+            AWS_REGISTRY="${{ secrets.AWS_REGISTRY }}"
+            AWS_REGION="${{ secrets.AWS_REGION }}"
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
+            DB_URL="${{ secrets.DB_URL }}"
+            DB_USERNAME="${{ secrets.DB_USERNAME }}"
+            DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+            JWT_ACCESS_TOKEN="${{ secrets.JWT_ACCESS_TOKEN }}"
             echo "AWS_REGISTRY: $AWS_REGISTRY"
             echo "AWS_REGION: $AWS_REGION"
             echo "SHORT_SHA: $SHORT_SHA"
-            IMAGE_TAG="test-$(echo $SHORT_SHA | cut -c1-8)"
+            echo "DB_URL: $DB_URL"
+            IMAGE_TAG="test-$SHORT_SHA"
             IMAGE_NAME="$AWS_REGISTRY/repo-ticketable:$IMAGE_TAG"
             echo "Pulling image: $IMAGE_NAME"
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_REGISTRY || { echo "ECR login failed"; exit 1; }
             docker pull $IMAGE_NAME || { echo "Failed to pull image"; exit 1; }
             docker stop ticketable_web || true                             # 기존 컨테이너 중지 없으면 무시
             docker rm ticketable_web || true                               # 기존 컨테이너 삭제 없으면 무시
             # 새 컨테이너 실행
-            docker run -d --name ticketable_web \
+            sudo docker run -d --name ticketable_web \
               -p 80:8080 \                                                 # 호스트 80 포트를 컨테이너 8080 포트에 매핑
               --env SPRING_DATASOURCE_URL="$DB_URL" \
               --env SPRING_DATASOURCE_USERNAME="$DB_USERNAME" \
