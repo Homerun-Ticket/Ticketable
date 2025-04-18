@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -26,13 +29,18 @@ public class CachingConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("seatCountsBySectionType");
+        SimpleCacheManager cacheManager = new SimpleCacheManager();
 
-        cacheManager.setCaffeine(
+        Cache seatCache = new CaffeineCache("seatCountsBySectionType",
                 Caffeine.newBuilder()
-                        .expireAfterWrite(30, TimeUnit.MINUTES) // 30분 후 자동 삭제
-        );
+                        .expireAfterWrite(12, TimeUnit.HOURS)
+                        .build());
 
+        Cache gameCache = new CaffeineCache("gamesByCondition",
+                Caffeine.newBuilder()
+                        .build());
+
+        cacheManager.setCaches(List.of(seatCache, gameCache));
         return cacheManager;
     }
 // 추후 분산 서버로 인한 레디스캐싱으로 변경 시 사용 예정
