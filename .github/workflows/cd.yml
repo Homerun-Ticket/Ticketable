@@ -84,7 +84,7 @@ jobs:
             --push .
 
       # EC2에 SSH 로 접속해 배포 수행
-      - name: SSH Deploy to EC2
+      - name: SSH Deploy to EC2 re
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -131,7 +131,7 @@ jobs:
               --env spring.cloud.aws.region.static="${{ secrets.REGION_VALUE }}" \
               --env spring.cloud.aws.credentials.access-key="$ACCESS_KEY" \
               --env spring.cloud.aws.credentials.secret-key="$SECRET_KEY" \
-              --env spring.data.redis.host="localhost" \
+              --env spring.data.redis.host="3.39.237.240" \
               --env spring.data.redis.port="6379" \
               --env spring.datasource.driver-class-name="com.mysql.cj.jdbc.Driver" \
               --env spring.jpa.hibernate.ddl-auto="update" \
