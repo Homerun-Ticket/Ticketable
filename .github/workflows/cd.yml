@@ -113,8 +113,8 @@ jobs:
             docker stop ticketable_web || true                             # 기존 컨테이너 중지 없으면 무시
             docker rm ticketable_web || true                               # 기존 컨테이너 삭제 없으면 무시
             # 새 컨테이너 실행
-            sudo docker run -d --name ticketable_web \
-              -p 80:8080 \                                                 # 호스트 80 포트를 컨테이너 8080 포트에 매핑
+            docker run -d --name ticketable_web \
+              -p 80:8080 \
               --env SPRING_DATASOURCE_URL="$DB_URL" \
               --env SPRING_DATASOURCE_USERNAME="$DB_USERNAME" \
               --env SPRING_DATASOURCE_PASSWORD="$DB_PASSWORD" \
