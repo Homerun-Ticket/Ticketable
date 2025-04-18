@@ -121,15 +121,15 @@ jobs:
             # 새 컨테이너 실행
             docker run -d --name ticketable_web \
               -p 8080:8080 \
-              --env DB_URL="$DB_URL" \
-              --env DB_USERNAME="$DB_USERNAME" \
-              --env DB_PASSWORD="$DB_PASSWORD" \
-              --env JWT_SECRET_KEY="$JWT_SECRET_KEY" \
-              --env JWT_ACCESS_TOKEN="$JWT_ACCESS_TOKEN" \
-              --env IMPORT_API_KEY="$IMPORT_API_KEY" \
-              --env IMPORT_API_SECRET="$IMPORT_API_SECRET" \
-              --env BUCKET_NAME="$BUCKET_NAME" \
-              --env REGION_VALUE="$REGION_VALUE" \
+              --env spring.datasource.url="$DB_URL" \
+              --env spring.datasource.username="$DB_USERNAME" \
+              --env spring.datasource.password="$DB_PASSWORD" \
+              --env jwt.secret.key="$JWT_SECRET_KEY" \
+              --env jwt.access.token="$JWT_ACCESS_TOKEN" \
+              --env import.api.key="$IMPORT_API_KEY" \
+              --env import.api.secret="$IMPORT_API_SECRET" \
+              --env spring.cloud.aws.s3.bucketName="$BUCKET_NAME" \
+              --env spring.cloud.aws.region.static="${{ secrets.REGION_VALUE }}" \
               --env spring.cloud.aws.credentials.access-key="$ACCESS_KEY" \
               --env spring.cloud.aws.credentials.secret-key="$SECRET_KEY" \
               $IMAGE_NAME || { echo "Failed to run container"; exit 1; }
