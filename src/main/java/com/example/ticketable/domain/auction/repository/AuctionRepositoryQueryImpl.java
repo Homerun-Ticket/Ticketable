@@ -3,6 +3,7 @@ package com.example.ticketable.domain.auction.repository;
 import static com.example.ticketable.domain.auction.entity.QAuction.*;
 import static com.example.ticketable.domain.auction.entity.QAuctionTicketInfo.*;
 import static com.example.ticketable.domain.game.entity.QGame.*;
+import static com.example.ticketable.domain.member.entity.QMember.*;
 import static com.example.ticketable.domain.stadium.entity.QSeat.*;
 import static com.example.ticketable.domain.stadium.entity.QSection.*;
 import static com.example.ticketable.domain.ticket.entity.QTicket.*;
@@ -51,13 +52,16 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 		BooleanExpression isTogether = dto.getIsTogether()
 			? auction.auctionTicketInfo.isTogether.isTrue()
 			: auction.auctionTicketInfo.isTogether.isFalse();
+		BooleanExpression deletedAtIsNull = auction.deletedAt.isNull();
 
 		List<Auction> results = jpaQueryFactory
 			.selectFrom(auction)
-			.join(auction.ticket, ticket)
-			.join(ticket.game, game)
-			.join(auction.auctionTicketInfo, auctionTicketInfo)
-			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether)
+			.join(auction.ticket, ticket).fetchJoin()
+			.join(ticket.game, game).fetchJoin()
+			.join(auction.auctionTicketInfo, auctionTicketInfo).fetchJoin()
+			.join(auction.seller, member).fetchJoin()
+			.leftJoin(auction.bidder, member).fetchJoin()
+			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether, deletedAtIsNull)
 			.offset(pageable.getPageNumber())
 			.limit(pageable.getPageSize())
 			.orderBy(auction.createdAt.asc())
@@ -66,7 +70,7 @@ public class AuctionRepositoryQueryImpl implements AuctionRepositoryQuery {
 		Long total = jpaQueryFactory
 			.select(auction.countDistinct())
 			.from(auction)
-			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether)
+			.where(homeEq, awayEq, startTimeBetween, seatCountEq, isTogether, deletedAtIsNull)
 			.fetchOne();
 
 		return new PageImpl<>(results, pageable, total != null ? total : 0L);

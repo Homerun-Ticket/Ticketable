@@ -5,9 +5,9 @@ import static com.example.ticketable.common.util.PageUtil.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,6 +21,7 @@ import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
 import com.example.ticketable.domain.auction.dto.request.AuctionCreateRequest;
 import com.example.ticketable.domain.auction.dto.request.AuctionSearchCondition;
+import com.example.ticketable.domain.auction.dto.response.AuctionBidResponse;
 import com.example.ticketable.domain.auction.dto.response.AuctionResponse;
 import com.example.ticketable.domain.auction.service.AuctionService;
 
@@ -53,6 +54,13 @@ public class AuctionController {
 		@PageableDefault(page = 1, size = 10) Pageable pageRequest
 	) {
 		return ResponseEntity.ok(auctionService.getAuctions(dto, correctPageIndex(pageRequest)));
+	}
+
+	@GetMapping(value = "/v1/auctions/{auctionId}/bid-point")
+	public ResponseEntity<AuctionBidResponse> getBidPoint(
+		@PathVariable Long auctionId
+	) {
+		return ResponseEntity.ok(auctionService.getBidPoint(auctionId));
 	}
 
 	@PostMapping("/v1/auctions/{auctionId}")

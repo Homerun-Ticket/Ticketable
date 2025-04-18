@@ -19,7 +19,12 @@ import jakarta.persistence.LockModeType;
 
 public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryQuery {
 	@Query(" SELECT a " +
-		"      FROM Auction a JOIN FETCH a.ticket t JOIN FETCH t.game g JOIN FETCH a.auctionTicketInfo ati " +
+		"      FROM Auction a "
+		+ "    JOIN FETCH a.ticket t "
+		+ "    JOIN FETCH t.game g "
+		+ "    JOIN FETCH a.auctionTicketInfo ati "
+		+ "    JOIN FETCH a.seller s"
+		+ "    LEFT JOIN FETCH a.bidder b" +
 		"     WHERE a.id = :id AND a.deletedAt IS NULL")
 	Optional<Auction> findByIdAndDeletedAtIsNullWithFetchJoin(@Param("id") Long id);
 
@@ -30,7 +35,12 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query(" SELECT a " +
-		"      FROM Auction a " +
+		"      FROM Auction a"
+		+ "    JOIN FETCH a.ticket t "
+		+ "    JOIN FETCH t.game g "
+		+ "    JOIN FETCH a.auctionTicketInfo ati "
+		+ "    JOIN FETCH a.seller s"
+		+ "    LEFT JOIN FETCH a.bidder b" +
 		"     WHERE a.id = :id AND a.deletedAt is null")
 	Optional<Auction> findByIdWithPessimisticLock(@Param("id") Long id);
 

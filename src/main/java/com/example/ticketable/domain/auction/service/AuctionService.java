@@ -6,9 +6,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.ticketable.common.util.AuctionBidRedisUtil;
+import com.example.ticketable.domain.auction.dto.event.BidUpdateEvent;
 import com.example.ticketable.domain.auction.dto.request.AuctionBidRequest;
+import com.example.ticketable.domain.auction.dto.response.AuctionBidResponse;
 import com.example.ticketable.domain.auction.entity.AuctionTicketInfo;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +43,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionService {
 
 	public static final int BID_UNIT = 100;
-	private static final int CHUNK_SIZE = 1000;
+	private static final int CHUNK_SIZE = 500;
 
 	private final MemberRepository memberRepository;
 	private final TicketRepository ticketRepository;
@@ -52,6 +55,7 @@ public class AuctionService {
 	private final AuctionTicketInfoService auctionTicketInfoService;
 	private final AuctionHistoryService auctionHistoryService;
 	private final AuctionBidRedisUtil auctionBidRedisUtil;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	@Transactional
 	public AuctionResponse createAuction(Auth auth, AuctionCreateRequest dto) {
@@ -103,6 +107,11 @@ public class AuctionService {
 		return new PagedModel<>(pages.map(AuctionResponse::of));
 	}
 
+	public AuctionBidResponse getBidPoint(Long auctionId) {
+		Integer latestBidPoint = auctionBidRedisUtil.getBidPoint(auctionId);
+		return new AuctionBidResponse(latestBidPoint);
+	}
+
 	@Transactional
 	public AuctionResponse bidAuction(Auth auth, Long auctionId, AuctionBidRequest dto) {
 
@@ -141,10 +150,11 @@ public class AuctionService {
 		}
 
 		// 9. 입찰내용 업데이트
-		auction.updateBid(bidder, auction.getBidPoint() + BID_UNIT);
+		int nextBid = auction.getBidPoint() + BID_UNIT;
+		auction.updateBid(bidder, nextBid);
 
-		// 10. Redis 최신 입찰가 반영
-		auctionBidRedisUtil.updateBidKey(auctionId, auction.getBidPoint() + BID_UNIT);
+		// 10. Event 발행을 통한 로직 실행순서 통제
+		applicationEventPublisher.publishEvent(new BidUpdateEvent(auctionId, nextBid));
 
 		return AuctionResponse.of(auction);
 	}
@@ -195,6 +205,8 @@ public class AuctionService {
 			pointService.increasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.SELL);
 			auction.getTicket().changeOwner(auction.getBidder());
 		}
+
+		auctionBidRedisUtil.deleteBidKey(auction.getId());
 	}
 
 	/*
@@ -214,8 +226,6 @@ public class AuctionService {
 
 			// 티켓 원래 주인 경매금액 뺏기
 			pointService.decreasePoint(auction.getSeller().getId(), auction.getBidPoint(), PointHistoryType.REFUND);
-
-			auctionBidRedisUtil.deleteBidKey(auction.getId());
 		}
 	}
 

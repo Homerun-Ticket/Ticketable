@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "auction", indexes = {
-	@Index(name = "idx_deletedAt", columnList = "deletedAt"),
-	@Index(name = "idx_deletedAt_createdAt", columnList = "deletedAt, createdAt")
+	@Index(name = "idx_deleted_at", columnList = "deleted_at"),
+	@Index(name = "idx_deleted_at_created_at", columnList = "deleted_at, created_at")
 })
 public class Auction extends Timestamped {
 

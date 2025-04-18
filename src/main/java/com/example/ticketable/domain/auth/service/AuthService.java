@@ -44,9 +44,9 @@ public class AuthService {
 			.role(MemberRole.of(request.getRole()))
 			.build();
 		Member savedMember = memberRepository.save(member);
-		
+		System.out.println("[DEBUG] member 저장 완료: " + savedMember.getId());
 		pointService.createPoint(savedMember);
-		
+		System.out.println("[DEBUG] point 저장 완료");
 		String accessToken = jwtUtil.createAccessToken(
 			savedMember.getId(), savedMember.getEmail(), savedMember.getName(), savedMember.getRole()
 		);
