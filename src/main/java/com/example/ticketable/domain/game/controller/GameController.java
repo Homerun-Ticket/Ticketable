@@ -34,12 +34,36 @@ public class GameController {
         return ResponseEntity.ok(gameService.createGame(request, file));
     }
 
-    @GetMapping("/v1/games")
-    public ResponseEntity<List<GameGetResponse>> getGames(
+    @GetMapping("/v0/games")
+    public ResponseEntity<List<GameGetResponse>> getGamesV0(
             @RequestParam (required = false) String team,
             @RequestParam (required = false) LocalDateTime date
     ) {
-        return ResponseEntity.ok(gameService.getGames(team, date));
+        return ResponseEntity.ok(gameService.getGamesV0(team, date));
+    }
+
+    @GetMapping("/v1/games")
+    public ResponseEntity<List<GameGetResponse>> getGamesV1(
+            @RequestParam (required = false) String team,
+            @RequestParam (required = false) LocalDateTime date
+    ) {
+        return ResponseEntity.ok(gameService.getGamesV1(team, date));
+    }
+
+    @GetMapping("/v2/games")
+    public ResponseEntity<List<GameGetResponse>> getGamesV2(
+            @RequestParam (required = false) String team,
+            @RequestParam (required = false) LocalDateTime date
+    ) {
+        return ResponseEntity.ok(gameService.getGamesV2(team, date));
+    }
+
+    @GetMapping("/v3/games")
+    public ResponseEntity<List<GameGetResponse>> getGamesV3(
+            @RequestParam (required = false) String team,
+            @RequestParam (required = false) LocalDateTime date
+    ) {
+        return ResponseEntity.ok(gameService.getGamesV3(team, date));
     }
 
     @GetMapping("/v0/games/{gameId}")

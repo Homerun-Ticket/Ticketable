@@ -21,6 +21,34 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
 
     List<Game> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    @Query("""
+    SELECT g FROM Game g
+    WHERE (:team IS NULL OR g.home = :team)
+      AND (:start IS NULL OR g.startTime >= :start)
+      AND (:end IS NULL OR g.startTime <= :end)
+      AND CURRENT_TIMESTAMP >= g.ticketingStartTime
+      AND CURRENT_TIMESTAMP < g.startTime
+""")
+    List<Game> findGamesV1(
+            @Param("team") String team,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query(value = """
+        SELECT * FROM game g
+        WHERE (:team IS NULL OR home = :team)
+        AND (:start IS NULL OR start_time >= :start)
+        AND (:end IS NULL OR start_time <= :end)
+        AND (NOW() >= ticketing_start_time)
+        AND (NOW() < start_time)
+    """, nativeQuery = true)
+    List<Game> findGamesV2(
+            @Param("team") String team,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
     @Query("SELECT g.stadium From Game g where g.id = :gameId")
     Stadium getStadiumByGameId(@Param("gameId") Long gameId);
 
@@ -185,4 +213,6 @@ GROUP BY s.type
             @Param("sectionId") Long sectionId,
             @Param("gameId") Long gameId
     );
+
+
 }

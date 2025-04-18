@@ -79,7 +79,7 @@ public class GameService {
         }
     }
 
-    public List<GameGetResponse> getGames(String team, LocalDateTime date) {
+    public List<GameGetResponse> getGamesV0(String team, LocalDateTime date) {
         List<Game> games;
 
         if (team != null && date != null) {
@@ -93,6 +93,56 @@ public class GameService {
         } else {
             games = gameRepository.findAll();
         }
+
+        return games.stream()
+                .map(GameGetResponse::of)
+                .collect(Collectors.toList());
+    }
+
+    public List<GameGetResponse> getGamesV1(String team, LocalDateTime date) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (date != null) {
+            LocalDateTime[] range = getDayRange(date);
+            start = range[0];
+            end = range[1];
+        }
+        List<Game> games = gameRepository.findGamesV1(team, start, end);
+
+        return games.stream()
+                .map(GameGetResponse::of)
+                .collect(Collectors.toList());
+    }
+
+    public List<GameGetResponse> getGamesV2(String team, LocalDateTime date) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (date != null) {
+            LocalDateTime[] range = getDayRange(date);
+            start = range[0];
+            end = range[1];
+        }
+
+        List<Game> games = gameRepository.findGamesV2(team, start, end);
+
+        return games.stream()
+                .map(GameGetResponse::of)
+                .collect(Collectors.toList());
+    }
+
+    public List<GameGetResponse> getGamesV3(String team, LocalDateTime date) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (date != null) {
+            LocalDateTime[] range = getDayRange(date);
+            start = range[0];
+            end = range[1];
+        }
+
+        List<Game> games = gameCacheService.getGamesCached(team, start, end);
 
         return games.stream()
                 .map(GameGetResponse::of)
@@ -136,8 +186,6 @@ public class GameService {
         List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameCacheService.getSectionSeatCountsCached(gameId);
         return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
     }
-
-
 
     // QueryDSL 버전
     public StadiumGetResponse getStadiumAndSectionSeatCountsV3(Long gameId) {
