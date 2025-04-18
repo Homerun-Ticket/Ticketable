@@ -31,17 +31,19 @@ public class Game {
 	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
 	private GameType type;
-	
+
 	private Integer point;
 
 	private String imagePath;
 
 	private LocalDateTime startTime;
 
+	private LocalDateTime ticketingStartTime;
+
 	private LocalDateTime deletedAt;
-	
+
 	@Builder
-	public Game(String away, Stadium stadium, String home, GameType type, Integer point, String imagePath, LocalDateTime startTime) {
+	public Game(String away, Stadium stadium, String home, GameType type, Integer point, String imagePath, LocalDateTime startTime, LocalDateTime ticketingStartTime) {
 		this.stadium = stadium;
 		this.away = away;
 		this.home = home;
@@ -49,6 +51,7 @@ public class Game {
 		this.point = point;
 		this.imagePath = imagePath;
 		this.startTime = startTime;
+		this.ticketingStartTime = ticketingStartTime;
 		this.deletedAt = null;
 	}
 
