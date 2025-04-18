@@ -38,7 +38,7 @@ public class TicketController {
 	@PostMapping("/v3/tickets")
 	public ResponseEntity<TicketResponse> createTicketV3(@AuthenticationPrincipal Auth auth,
 		@RequestBody TicketCreateRequest ticketCreateRequest) {
-		TicketResponse ticketResponse = ticketService.reservationTicketV3(auth, ticketCreateRequest);
+		TicketResponse ticketResponse = ticketService.reservationTicketV4(auth, ticketCreateRequest);
 		return ResponseEntity.ok().body(ticketResponse);
 	}
 

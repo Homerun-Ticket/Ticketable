@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface GameRepository extends JpaRepository<Game, Long> {
+public interface GameRepository extends JpaRepository<Game, Long>, GameRepositoryQuery {
 
     List<Game> findByHomeAndStartTimeBetween(String team, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
@@ -24,6 +24,88 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @Query("SELECT g.stadium From Game g where g.id = :gameId")
     Stadium getStadiumByGameId(@Param("gameId") Long gameId);
 
+
+//    // 타입별 예약되지 않는 좌석 수 쿼리 통합 버전
+//    @Query("""
+//    SELECT new com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse(
+//        s.type, COUNT(seat))
+//    FROM Seat seat
+//    JOIN seat.section s
+//    JOIN s.stadium st
+//    JOIN Game g ON g.stadium.id = st.id
+//    WHERE g.id = :gameId
+//      AND seat.id NOT IN (
+//        SELECT ts.seat.id
+//        FROM TicketSeat ts
+//        JOIN ts.ticket t
+//        WHERE t.game.id = :gameId
+//          AND t.deletedAt IS NULL
+//      )
+//    GROUP BY s.type
+//    """)
+//    List<SectionTypeSeatCountResponse> findUnBookedSeatsCountInSectionTypeByGameIdV1(
+//            @Param("gameId") Long gameId
+//    );
+//
+//
+//
+//    // 타입별 예약되지 않는 좌석 수 쿼리 통합 버전 & 서브 쿼리 삭제 버전`
+//    @Query("""
+//    SELECT new com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse(
+//        s.type, COUNT(seat))
+//    FROM Seat seat
+//    JOIN seat.section s
+//    JOIN s.stadium st
+//    JOIN Game g ON g.stadium.id = st.id
+//    LEFT JOIN TicketSeat ts ON ts.seat.id = seat.id
+//    LEFT JOIN Ticket t ON ts.ticket.id = t.id AND t.game.id = :gameId AND t.deletedAt IS NULL
+//    WHERE g.id = :gameId
+//        AND t.id IS NULL
+//    GROUP BY s.type
+//    """)
+//    List<SectionTypeSeatCountResponse> findUnBookedSeatsCountInSectionTypeByGameIdV2(
+//            @Param("gameId") Long gameId
+//    );
+
+    @Query("""
+SELECT new com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse(
+    s.type,
+    SUM(CASE 
+        WHEN t.id IS NULL OR t.deletedAt IS NOT NULL THEN 1
+        ELSE 0
+    END)
+)
+FROM Seat seat
+JOIN seat.section s
+JOIN s.stadium st
+JOIN Game g ON g.stadium.id = st.id
+LEFT JOIN TicketSeat ts ON ts.seat.id = seat.id
+LEFT JOIN Ticket t ON ts.ticket.id = t.id AND t.game.id = :gameId
+WHERE g.id = :gameId
+GROUP BY s.type
+""")
+    List<SectionTypeSeatCountResponse> findUnBookedSeatsCountInSectionTypeByGameIdV1(
+            @Param("gameId") Long gameId
+    );
+
+    @Query(value = """
+SELECT 
+    s.type AS section_type,
+    COUNT(seat.id) - COUNT(t.id) AS remaining_seats
+FROM Seat seat
+JOIN Section s ON seat.section_id = s.id
+JOIN Stadium st ON s.stadium_id = st.id
+JOIN Game g ON g.stadium_id = st.id
+LEFT JOIN Ticket_Seat ts ON ts.seat_id = seat.id
+LEFT JOIN Ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
+WHERE g.id = :gameId
+GROUP BY s.type
+""", nativeQuery = true)
+    List<SectionTypeSeatCountResponse> findUnBookedSeatsCountInSectionTypeByGameIdV2(@Param("gameId") Long gameId);
+
+
+
+    // 쿼리 통합 전 전체 좌석 수 조회
     @Query("""
     SELECT new com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse(
         s.type, COUNT(seat))
@@ -32,18 +114,30 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     JOIN s.stadium st
     JOIN Game g ON g.stadium.id = st.id
     WHERE g.id = :gameId
-      AND seat.id NOT IN (
-        SELECT ts.seat.id
-        FROM TicketSeat ts
-        JOIN ts.ticket t
-        WHERE t.game.id = :gameId
-          AND t.deletedAt IS NULL
-      )
     GROUP BY s.type
     """)
-    List<SectionTypeSeatCountResponse> findUnBookedSeatsCountInSectionTypeByGameId(
+    List<SectionTypeSeatCountResponse> findTotalSeatsCountInSectionTypeByGameId(
             @Param("gameId") Long gameId
     );
+
+    // 쿼리 통합 전 예약된 좌석 수 조회 (구역 타입 기준)
+    @Query("""
+    SELECT new com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse(
+        s.type, COUNT(ts))
+    FROM TicketSeat ts
+    JOIN ts.seat seat
+    JOIN seat.section s
+    JOIN ts.ticket t
+    WHERE t.game.id = :gameId
+      AND t.deletedAt IS NULL
+    GROUP BY s.type
+    """)
+    List<SectionTypeSeatCountResponse> findBookedSeatsCountInSectionTypeByGameId(
+            @Param("gameId") Long gameId
+    );
+
+
+
 
     @Query("""
     SELECT new com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse(

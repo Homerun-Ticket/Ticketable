@@ -4,7 +4,6 @@ import static com.example.ticketable.common.exception.ErrorCode.GAME_NOT_FOUND;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
 import com.example.ticketable.domain.member.entity.Member;
@@ -14,6 +13,7 @@ import com.example.ticketable.domain.ticket.dto.TicketContext;
 import com.example.ticketable.domain.ticket.dto.request.TicketCreateRequest;
 import com.example.ticketable.domain.ticket.entity.Ticket;
 import com.example.ticketable.domain.ticket.repository.TicketRepository;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +31,9 @@ public class TicketCreateService {
 	private final TicketSeatService ticketSeatService;
 	private final SeatService seatService;
 	private final TicketPriceCalculator ticketPriceCalculator;
-	private final SeatHoldRedisUtil seatHoldRedisUtil;
 
 	@Transactional
 	public TicketContext createTicketV2(Auth auth, TicketCreateRequest ticketCreateRequest) {
-
-		seatHoldRedisUtil.checkHeldSeatAtomic(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId(), String.valueOf(auth.getId()));
-		ticketSeatService.checkDuplicateSeats(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId());
-
 
 		List<Seat> seats = seatService.getAllSeatEntity(ticketCreateRequest.getSeats());
 		Game game = gameRepository.findById(ticketCreateRequest.getGameId()).orElseThrow(()->new ServerException(GAME_NOT_FOUND));
