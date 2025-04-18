@@ -34,6 +34,9 @@ public enum ErrorCode {
 	TICKET_PAYMENT_NOT_FOUND("티켓 결제 내역이 존재하지않습니다.", BAD_REQUEST),
 	TICKET_ALREADY_RESERVED("이미 예매된 좌석입니다.", HttpStatus.CONFLICT),
 
+	//대기열
+	INVALID_WAITING_TOKEN("올바르지않은 대기열 토큰 입니다.", BAD_REQUEST),
+
 	// 경매
 	AUCTION_DUPLICATION("이미 경매에 등록한 티켓입니다.", CONFLICT),
 	AUCTION_ACCESS_DENIED("경매에 대한 권한이 없습니다.", FORBIDDEN),
