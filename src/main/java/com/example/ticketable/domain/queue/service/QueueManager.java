@@ -47,6 +47,11 @@ public class QueueManager {
 		proceedQueueService.removeToken(token);
 	}
 
+	public long getExpectedWaitingOrder(long currentWaitingOrder) {
+		double v = QueueSystemConstants.PROCEED_QUEUE_TARGET_SIZE * 0.8;
+		return (long) Math.floor(currentWaitingOrder / v) + 1;
+	}
+
 	@Scheduled(fixedRate = 1000)
 	public void moveWaitingToProceedAtomicScheduled(){
 		proceedQueueService.pullFromWaitingQueue(QueueSystemConstants.PROCEED_QUEUE_TARGET_SIZE);

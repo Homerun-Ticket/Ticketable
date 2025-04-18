@@ -40,6 +40,15 @@ public class WaitingQueueAspect {
 			token = queueManager.enterWaitingQueue();
 		}
 		long waitingOrder = queueManager.getWaitingOrder(token);
-		return ResponseEntity.accepted().body(new WaitingResponse(waitingOrder,"wait" , token));
+		long expectedWaitingSec = queueManager.getExpectedWaitingOrder(waitingOrder);
+		return ResponseEntity.accepted().body(
+			new WaitingResponse(
+				waitingOrder,
+			"wait" ,
+				token,
+				expectedWaitingSec,
+				Math.min(QueueSystemConstants.MAX_POLLING_TIME, expectedWaitingSec)
+			)
+		);
 	}
 }
