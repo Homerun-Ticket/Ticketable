@@ -41,12 +41,13 @@ public class SecurityConfig {
 				.requestMatchers("/login.html").permitAll()
 				.requestMatchers("/point-charge.html").permitAll()
 				.requestMatchers("/api/v1/auth/**").permitAll()
+				.requestMatchers("/actuator/prometheus").permitAll()
 				.requestMatchers(HttpMethod.GET,"/api/v1/games/**").authenticated()
 				.requestMatchers("/api/v1/games/**").hasAuthority(MemberRole.Authority.ADMIN)
 				.requestMatchers("/api/v1/stadiums/**").hasAuthority(MemberRole.Authority.ADMIN)
 				.requestMatchers("/api/v1/sections/**").hasAuthority(MemberRole.Authority.ADMIN)
 				.requestMatchers("/api/v1/seats/**").hasAuthority(MemberRole.Authority.ADMIN)
-				.requestMatchers("/actuator/prometheus").permitAll()
+
 				.anyRequest().authenticated()
 			);
 		
