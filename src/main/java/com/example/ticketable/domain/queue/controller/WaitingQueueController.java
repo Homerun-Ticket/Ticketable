@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.queue.controller;
 
+import com.example.ticketable.domain.queue.QueueSystemConstants;
 import com.example.ticketable.domain.queue.dto.WaitingResponse;
 import com.example.ticketable.domain.queue.service.QueueManager;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,16 @@ public class WaitingQueueController {
 	@GetMapping("/v1/waiting-queue/order")
 	public ResponseEntity<WaitingResponse> getRemain(@RequestParam(name = "waiting-token") String token) {
 		long waitingOrder = queueManager.getWaitingOrder(token);
-		String state = waitingOrder > 0 ? "wait" : "allow";
-		return ResponseEntity.ok(new WaitingResponse(waitingOrder, state, token));
+		long expectedWaitingSec = queueManager.getExpectedWaitingOrder(waitingOrder);
+		return ResponseEntity.ok(
+			new WaitingResponse(
+				waitingOrder,
+				"wait",
+				token,
+				expectedWaitingSec,
+				Math.min(expectedWaitingSec, QueueSystemConstants.MAX_POLLING_TIME)
+			)
+		);
 	}
 
 	@DeleteMapping("/v1/waiting-queue")

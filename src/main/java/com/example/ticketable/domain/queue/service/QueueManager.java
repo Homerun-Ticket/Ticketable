@@ -27,7 +27,7 @@ public class QueueManager {
 		boolean isProceed = proceedQueueService.isContains(token);
 		//대기열, 작업열 에 존재하지않으면 잘못된 토큰
 		if(waitingOrder == -1 && !isProceed) {
-			log.info("token is : {}", token);
+			log.warn("{} : {}", INVALID_WAITING_TOKEN.getMessage(), token);
 			throw new ServerException(INVALID_WAITING_TOKEN);
 		}
 		return waitingOrder;
@@ -45,6 +45,11 @@ public class QueueManager {
 	public void deleteTokenFromWaitingAndProceedQueue(String token) {
 		waitingQueueService.removeToken(token);
 		proceedQueueService.removeToken(token);
+	}
+
+	public long getExpectedWaitingOrder(long currentWaitingOrder) {
+		double v = QueueSystemConstants.PROCEED_QUEUE_TARGET_SIZE * 0.8;
+		return (long) Math.floor(currentWaitingOrder / v) + 1;
 	}
 
 	@Scheduled(fixedRate = 1000)

@@ -20,25 +20,35 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class WaitingQueueAspect {
 	private final QueueManager queueManager;
-	private final String WAITING_QUEUE_HEADER_NAME = "waiting-queue";
 
 	@Around("@annotation(waitingQueue)")
 	private Object around(ProceedingJoinPoint joinPoint, WaitingQueue waitingQueue) throws Throwable {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = ((ServletRequestAttributes) attributes).getRequest();
+		String token = request.getHeader(QueueSystemConstants.WAITING_QUEUE_HEADER_NAME);
 
-		String token = request.getHeader(WAITING_QUEUE_HEADER_NAME);
-		//토큰 값이 존재한다면 입장 가능한지 체크
 		if(token!= null && queueManager.isAllowed(token)) {
-			Object proceed = joinPoint.proceed();
-			queueManager.removeTokenFromProceedQueue(token);
-			return proceed;
-		} else {
-			if(token == null || token.isEmpty()) {
-				token = queueManager.enterWaitingQueue();
+			try {
+				return joinPoint.proceed();
+			} finally {
+				queueManager.removeTokenFromProceedQueue(token);
 			}
-			long waitingOrder = queueManager.getWaitingOrder(token);
-			return ResponseEntity.accepted().body(new WaitingResponse(waitingOrder,"wait" , token));
 		}
+
+		// 토큰이 없거나, 아직 입장 허용이 안된 경우
+		if(token == null || token.isEmpty()) {
+			token = queueManager.enterWaitingQueue();
+		}
+		long waitingOrder = queueManager.getWaitingOrder(token);
+		long expectedWaitingSec = queueManager.getExpectedWaitingOrder(waitingOrder);
+		return ResponseEntity.accepted().body(
+			new WaitingResponse(
+				waitingOrder,
+			"wait" ,
+				token,
+				expectedWaitingSec,
+				Math.min(QueueSystemConstants.MAX_POLLING_TIME, expectedWaitingSec)
+			)
+		);
 	}
 }
