@@ -114,12 +114,12 @@ jobs:
             docker rm ticketable_web || true                               # 기존 컨테이너 삭제 없으면 무시
             # 새 컨테이너 실행
             docker run -d --name ticketable_web \
-              -p 80:8080 \
+              -p 8080 \
               --env SPRING_DATASOURCE_URL="$DB_URL" \
               --env SPRING_DATASOURCE_USERNAME="$DB_USERNAME" \
               --env SPRING_DATASOURCE_PASSWORD="$DB_PASSWORD" \
               --env JWT_SECRET_KEY="$JWT_SECRET_KEY" \
-              --env JWT_ACCESS_EXPIRATION="$JWT_ACCESS_TOKEN" \
+              --env JWT_ACCESS_TOKEN="$JWT_ACCESS_TOKEN" \
               $IMAGE_NAME || { echo "Failed to run container"; exit 1; }
             echo "Deployment successful!"                                 # 배포 완료 로그
             docker logs ticketable_web                                    # 컨테이너 로그 출력
