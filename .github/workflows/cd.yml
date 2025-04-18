@@ -132,6 +132,8 @@ jobs:
               --env spring.cloud.aws.region.static="${{ secrets.REGION_VALUE }}" \
               --env spring.cloud.aws.credentials.access-key="$ACCESS_KEY" \
               --env spring.cloud.aws.credentials.secret-key="$SECRET_KEY" \
+              --env spring.data.redis.host="localhost" \
+              --env spring.data.redis.port="6379" \
               $IMAGE_NAME || { echo "Failed to run container"; exit 1; }
             echo "Deployment successful!"                                 # 배포 완료 로그
             docker logs ticketable_web                                    # 컨테이너 로그 출력
