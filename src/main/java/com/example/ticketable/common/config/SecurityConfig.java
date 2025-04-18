@@ -34,7 +34,6 @@ public class SecurityConfig {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.addFilterBefore(authenticationFilter, SecurityContextHolderAwareRequestFilter.class)
 			.formLogin(AbstractHttpConfigurer::disable)
-			.anonymous(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.logout(AbstractHttpConfigurer::disable)
 			.rememberMe(AbstractHttpConfigurer::disable)
