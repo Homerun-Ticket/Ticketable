@@ -2,6 +2,7 @@ package com.example.ticketable.domain.game.service;
 
 import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.repository.GameRepository;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,34 @@ class GameServiceTest {
             stopWatch.stop();
             result[i] = stopWatch.getTotalTimeMillis();
             assertNotNull(response.getId());
+        }
+
+        for (int i = 0; i<10; i++) {
+            System.out.println("V2time: " + result[i] +"ms");
+        }
+
+        for (long time : result) sum += time;
+        System.out.println("v2 버전 평균 실행 시간: " + (sum / result.length) + "ms");
+
+    }
+
+    @Test
+    void getStadiumAndSectionSeatCounts2() {
+        // given
+        Long gameId = 1L;
+        long result [] = new long[10];
+        String type = "외야석";
+        long sum = 0;
+        for (int i = 0; i<10; i++) {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            // when
+           List<SectionSeatCountResponse> response = gameService.getAvailableSeatsBySectionTypeV2(gameId, type);
+
+            // then
+            stopWatch.stop();
+            result[i] = stopWatch.getTotalTimeMillis();
+            assertNotEquals(response.size(), 0);
         }
 
         for (int i = 0; i<10; i++) {
