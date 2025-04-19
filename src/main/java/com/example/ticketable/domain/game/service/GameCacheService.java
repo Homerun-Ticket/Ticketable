@@ -1,12 +1,11 @@
 package com.example.ticketable.domain.game.service;
 
-import com.example.ticketable.common.exception.ErrorCode;
-import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.domain.game.dto.response.GameGetResponse;
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.repository.GameRepository;
 import com.example.ticketable.domain.game.util.GameCacheHelper;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse;
+import com.example.ticketable.domain.stadium.entity.Seat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -16,10 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +30,12 @@ public class GameCacheService {
     public List<SectionTypeSeatCountResponse> getSectionSeatCountsCached(Long gameId) {
         log.info("💡 캐시 미적중! DB에서 seat count 조회 - gameId: {}", gameId);
         return gameRepository.findUnBookedSeatsCountInSectionTypeByGameIdV2(gameId);
+    }
+
+    @Cacheable(value = "seatCountsBySectionCode", key = "T(String).format('%s:%s', #gameId, #type)")
+    public List<SectionSeatCountResponse> getSectionCodeSeatCountsCached(Long gameId, String type) {
+        log.info("💡 캐시 미적중! DB에서 seat count 조회 - gameId: {} - type {}", gameId, type);
+        return gameRepository.findSectionSeatCountsBySectionIdV2(gameId, type);
     }
 
     @Cacheable(
@@ -57,6 +59,26 @@ public class GameCacheService {
             cache.put(gameId, updated);
             log.info("캐시 갱신");
         }
+    }
+
+    public void handleAfterTicketChangeByType(Long gameId, String type) {
+        Cache cache = cacheManager.getCache("seatCountsBySectionCode");
+        String key = String.format("%s:%s", gameId, type);
+        if (gameCacheHelper.isEvictStrategy(gameId)) {
+            cache.evict(key);
+            log.info("캐시 삭제");
+        } else {
+            List<SectionSeatCountResponse> updated =
+                    gameRepository.findSectionSeatCountsBySectionIdV2(gameId, type);
+            cache.put(key, updated);
+            log.info("캐시 갱신");
+        }
+    }
+
+    public void handleAfterTicketChangeAll(Long gameId, Seat seat) {
+        String type = seat.getSection().getType();
+        handleAfterTicketChange(gameId);             // sectionType 캐시 처리
+        handleAfterTicketChangeByType(gameId, type); // sectionCode 캐시 처리
     }
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정

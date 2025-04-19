@@ -31,16 +31,19 @@ public class CachingConfig {
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
-        Cache seatCache = new CaffeineCache("seatCountsBySectionType",
+        Cache sectionCache = new CaffeineCache("seatCountsBySectionType",
                 Caffeine.newBuilder()
                         .expireAfterWrite(12, TimeUnit.HOURS)
                         .build());
-
+        Cache sectionTypeCache = new CaffeineCache("seatCountsBySectionCode",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(12, TimeUnit.HOURS)
+                        .build());
         Cache gameCache = new CaffeineCache("gamesByCondition",
                 Caffeine.newBuilder()
                         .build());
 
-        cacheManager.setCaches(List.of(seatCache, gameCache));
+        cacheManager.setCaches(List.of(sectionCache, sectionTypeCache, gameCache));
         return cacheManager;
     }
 // 추후 분산 서버로 인한 레디스캐싱으로 변경 시 사용 예정

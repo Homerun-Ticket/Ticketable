@@ -169,23 +169,41 @@ GROUP BY s.type
 
     @Query("""
     SELECT new com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse(
-        s.code , COUNT(st.id))
+        s.code , SUM(
+        CASE
+        WHEN t.id IS NULL OR t.deletedAt IS NOT NULL THEN 1
+        ELSE 0
+    END))
     FROM Seat seat
     JOIN seat.section s
     JOIN s.stadium st
     JOIN Game g ON g.stadium.id = st.id
+    LEFT JOIN TicketSeat ts ON ts.seat.id = seat.id
+    LEFT JOIN Ticket t ON ts.ticket.id = t.id AND t.game.id = :gameId
     WHERE g.id = :gameId
       AND s.type = :type
-      AND seat.id NOT IN (
-        SELECT ts.seat.id
-        FROM TicketSeat ts
-        JOIN ts.ticket t
-        WHERE t.game.id = :gameId
-          AND t.deletedAt IS NULL
-      )
-    GROUP BY s.code
+    GROUP BY s.id
     """)
-    List<SectionSeatCountResponse> findSectionSeatCountsBySectionId(
+    List<SectionSeatCountResponse> findSectionSeatCountsBySectionIdV1(
+            @Param("gameId") Long gameId,
+            @Param("type") String type
+    );
+
+    @Query(value = """
+SELECT 
+    s.code AS section_code,
+    COUNT(seat.id) - COUNT(t.id) AS remaining_seats
+FROM Seat seat
+JOIN Section s ON seat.section_id = s.id
+JOIN Stadium st ON s.stadium_id = st.id
+JOIN Game g ON g.stadium_id = st.id
+LEFT JOIN Ticket_Seat ts ON ts.seat_id = seat.id
+LEFT JOIN Ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
+WHERE g.id = :gameId
+ AND s.type = :type
+GROUP BY s.id
+""", nativeQuery = true)
+    List<SectionSeatCountResponse> findSectionSeatCountsBySectionIdV2(
             @Param("gameId") Long gameId,
             @Param("type") String type
     );

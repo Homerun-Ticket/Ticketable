@@ -79,6 +79,7 @@ public class GameService {
         }
     }
 
+    // 메서드 병합전
     public List<GameGetResponse> getGamesV0(String team, LocalDateTime date) {
         List<Game> games;
 
@@ -99,6 +100,7 @@ public class GameService {
                 .collect(Collectors.toList());
     }
 
+    // JPQL 메서드 병합 후
     public List<GameGetResponse> getGamesV1(String team, LocalDateTime date) {
         LocalDateTime start = null;
         LocalDateTime end = null;
@@ -115,6 +117,7 @@ public class GameService {
                 .collect(Collectors.toList());
     }
 
+    // Native 쿼리
     public List<GameGetResponse> getGamesV2(String team, LocalDateTime date) {
         LocalDateTime start = null;
         LocalDateTime end = null;
@@ -132,6 +135,7 @@ public class GameService {
                 .collect(Collectors.toList());
     }
 
+    // QueryDSL 버전
     public List<GameGetResponse> getGamesV3(String team, LocalDateTime date) {
         LocalDateTime start = null;
         LocalDateTime end = null;
@@ -196,8 +200,17 @@ public class GameService {
     }
 
 
-    public List<SectionSeatCountResponse> getAvailableSeatsBySectionType(Long gameId, String type) {
-        return gameRepository.findSectionSeatCountsBySectionId(gameId, type);
+    public List<SectionSeatCountResponse> getAvailableSeatsBySectionTypeV1(Long gameId, String type) {
+        return gameRepository.findSectionSeatCountsBySectionIdV1(gameId, type);
+    }
+
+    public List<SectionSeatCountResponse> getAvailableSeatsBySectionTypeV2(Long gameId, String type) {
+//        return gameRepository.findSectionSeatCountsBySectionIdV2(gameId, type);
+        return gameCacheService.getSectionCodeSeatCountsCached(gameId, type);
+    }
+
+    public List<SectionSeatCountResponse> getAvailableSeatsBySectionTypeV3(Long gameId, String type) {
+        return gameRepository.findSectionSeatCountsBySectionIdV3(gameId, type);
     }
 
     public List<SeatGetResponse> getSeatInfoBySection(Long sectionId, Long gameId) {

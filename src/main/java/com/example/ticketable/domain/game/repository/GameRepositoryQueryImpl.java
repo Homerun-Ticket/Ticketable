@@ -2,6 +2,7 @@ package com.example.ticketable.domain.game.repository;
 
 import com.example.ticketable.domain.game.entity.Game;
 import com.example.ticketable.domain.game.entity.QGame;
+import com.example.ticketable.domain.stadium.dto.response.SectionSeatCountResponse;
 import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountResponse;
 import com.example.ticketable.domain.stadium.entity.QSeat;
 import com.example.ticketable.domain.stadium.entity.QSection;
@@ -62,6 +63,34 @@ public class GameRepositoryQueryImpl implements GameRepositoryQuery {
                         end == null ? null : game.startTime.loe(end),
                         team == null ? null : game.home.eq(team)
                 )
+                .fetch();
+    }
+
+    @Override
+    public List<SectionSeatCountResponse> findSectionSeatCountsBySectionIdV3(Long gameId, String type) {
+        QSeat seat = QSeat.seat;
+        QSection section = QSection.section;
+        QStadium stadium = QStadium.stadium;
+        QGame game = QGame.game;
+        QTicketSeat ts = QTicketSeat.ticketSeat;
+        QTicket ticket = QTicket.ticket;
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        SectionSeatCountResponse.class,
+                        section.code,
+                        seat.id.count().subtract(ticket.id.count())
+                ))
+                .from(seat)
+                .join(seat.section, section)
+                .join(section.stadium, stadium)
+                .join(game).on(game.stadium.eq(stadium))
+                .leftJoin(ts).on(ts.seat.eq(seat))
+                .leftJoin(ticket).on(ticket.eq(ts.ticket)
+                        .and(ticket.game.eq(game))
+                        .and(ticket.deletedAt.isNull()))
+                .where(game.id.eq(gameId)
+                        .and(section.type.eq(type)))
+                .groupBy(section.id)
                 .fetch();
     }
 }

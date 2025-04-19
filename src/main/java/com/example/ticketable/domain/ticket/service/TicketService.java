@@ -11,6 +11,8 @@ import com.example.ticketable.common.util.SeatHoldRedisUtil;
 import com.example.ticketable.domain.game.service.GameCacheService;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
 import com.example.ticketable.domain.point.service.PointService;
+import com.example.ticketable.domain.stadium.entity.Seat;
+import com.example.ticketable.domain.stadium.service.SeatService;
 import com.example.ticketable.domain.ticket.dto.TicketContext;
 import com.example.ticketable.domain.ticket.dto.request.TicketCreateRequest;
 import com.example.ticketable.domain.ticket.dto.response.TicketResponse;
@@ -37,6 +39,7 @@ public class TicketService {
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
 	private final ApplicationEventPublisher eventPublisher;
 	private final GameCacheService gameCacheService;
+	private final SeatService seatService;
 
 	@Transactional(readOnly = true)
 	public TicketResponse getTicket(Long ticketId) {
@@ -64,8 +67,10 @@ public class TicketService {
 		ticketPaymentService.paymentTicket(ticketContext);
 
 		eventPublisher.publishEvent(new SeatHoldReleaseEvent(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId()));
-		// 캐싱 추가
-		gameCacheService.handleAfterTicketChange(ticketCreateRequest.getGameId());
+
+		// 캐싱
+		gameCacheService.handleAfterTicketChangeAll(ticketCreateRequest.getGameId(), ticketContext.getSeats().get(0));
+
 		return ticketContext.toResponse();
 	}
 
@@ -87,8 +92,7 @@ public class TicketService {
 		pointService.increasePoint(ticket.getMember().getId(), refund, PointHistoryType.REFUND);
 
 		// 캐싱 삭제
-		Long gameId = ticket.getGame().getId();
-		gameCacheService.handleAfterTicketChange(gameId);
+		gameCacheService.handleAfterTicketChangeAll(ticket.getGame().getId(), ticketSeatService.getSeat(ticketId).get(0));
 	}
 
 	/**

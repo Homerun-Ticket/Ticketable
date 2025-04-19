@@ -100,7 +100,23 @@ public class GameController {
             @PathVariable Long gameId,
             @RequestParam String type
     ) {
-        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionType(gameId, type));
+        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionTypeV1(gameId, type));
+    }
+
+    @GetMapping("/v2/games/{gameId}/sectionTypes")
+    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionTypeV2(
+            @PathVariable Long gameId,
+            @RequestParam String type
+    ) {
+        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionTypeV2(gameId, type));
+    }
+
+    @GetMapping("/v3/games/{gameId}/sectionTypes")
+    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionTypeV3(
+            @PathVariable Long gameId,
+            @RequestParam String type
+    ) {
+        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionTypeV3(gameId, type));
     }
 
     @GetMapping("/v1/games/{gameId}/sections/{sectionId}")

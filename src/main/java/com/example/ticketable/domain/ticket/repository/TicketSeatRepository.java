@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.ticket.repository;
 
+import com.example.ticketable.domain.stadium.entity.Seat;
 import com.example.ticketable.domain.ticket.entity.TicketSeat;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,6 @@ public interface TicketSeatRepository extends JpaRepository<TicketSeat, Long> {
 	boolean existsByGameIdAndSeatIdInAndTicketDeletedAtIsNull(Long gameId, List<Long> seatIds);
 
 	void deleteAllByTicketId(Long ticketId);
+
+    List<Seat> findByTicketId(Long ticketId);
 }
