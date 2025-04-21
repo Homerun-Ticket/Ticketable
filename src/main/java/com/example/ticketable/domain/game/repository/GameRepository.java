@@ -185,4 +185,18 @@ GROUP BY s.type
             @Param("sectionId") Long sectionId,
             @Param("gameId") Long gameId
     );
+
+
+    @Query("select game.id "
+        + "   from Game game"
+        + "  inner join Stadium stadium "
+        + "          on game.stadium = stadium "
+        + "  inner join Section section"
+        + "          on section.stadium = stadium "
+        + "  inner join Seat seat"
+        + "          on seat.section = section "
+        + "  where game.id = :gameId"
+        + "    and seat.id in :seatIds"
+        + "    and game.deletedAt is null ")
+    List<Long> findValidSeatIdsByGameId(Long gameId, List<Long> seatIds);
 }
