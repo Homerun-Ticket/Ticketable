@@ -119,12 +119,36 @@ public class GameController {
         return ResponseEntity.ok(gameService.getAvailableSeatsBySectionTypeV3(gameId, type));
     }
 
-    @GetMapping("/v1/games/{gameId}/sections/{sectionId}")
-    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySection(
+    @GetMapping("/v0/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySectionV0(
             @PathVariable Long gameId,
             @PathVariable Long sectionId
     ) {
-        return ResponseEntity.ok(gameService.getSeatInfoBySection(sectionId, gameId));
+        return ResponseEntity.ok(gameService.getSeatInfoBySectionV0(sectionId, gameId));
+    }
+
+    @GetMapping("/v1/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySectionV1(
+            @PathVariable Long gameId,
+            @PathVariable Long sectionId
+    ) {
+        return ResponseEntity.ok(gameService.getSeatInfoBySectionV1(sectionId, gameId));
+    }
+
+    @GetMapping("/v2/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySectionV2(
+            @PathVariable Long gameId,
+            @PathVariable Long sectionId
+    ) {
+        return ResponseEntity.ok(gameService.getSeatInfoBySectionV2(sectionId, gameId));
+    }
+
+    @GetMapping("/v3/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySectionV3(
+            @PathVariable Long gameId,
+            @PathVariable Long sectionId
+    ) {
+        return ResponseEntity.ok(gameService.getSeatInfoBySectionV3(sectionId, gameId));
     }
 
     @PutMapping("/v1/games/{gameId}")

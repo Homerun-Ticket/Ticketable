@@ -21,6 +21,7 @@ public class Seat {
 	@Column(length = 20)
 	private String position;
 
+	@Column(columnDefinition = "TINYINT(1)")
 	private boolean isBlind;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

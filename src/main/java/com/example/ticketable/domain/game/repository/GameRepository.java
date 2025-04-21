@@ -190,7 +190,7 @@ GROUP BY s.type
     );
 
     @Query(value = """
-SELECT 
+SELECT
     s.code AS section_code,
     COUNT(seat.id) - COUNT(t.id) AS remaining_seats
 FROM Seat seat
@@ -211,26 +211,54 @@ GROUP BY s.id
     @Query("""
     SELECT new com.example.ticketable.domain.stadium.dto.response.SeatGetResponse(
         s.id, s.position, s.isBlind,
-        CASE 
+        CASE
             WHEN EXISTS (
-                SELECT 1 
-                FROM TicketSeat ts 
-                JOIN ts.ticket t 
-                WHERE ts.seat = s 
-                AND t.game.id = :gameId 
+                SELECT 1
+                FROM TicketSeat ts
+                JOIN ts.ticket t
+                WHERE ts.seat = s
+                AND t.game.id = :gameId
                 AND t.deletedAt IS NULL
-            ) 
-            THEN true 
-            ELSE false 
+            )
+            THEN true
+            ELSE false
         END
     )
     FROM Seat s
     WHERE s.section.id = :sectionId
     """)
-    List<SeatGetResponse> findSeatsWithBookingStatusBySectionIdAndGameId(
+    List<SeatGetResponse> findSeatsWithBookingStatusBySectionIdAndGameIdV0(
             @Param("sectionId") Long sectionId,
             @Param("gameId") Long gameId
     );
 
+@Query("""
+SELECT new com.example.ticketable.domain.stadium.dto.response.SeatGetResponse(
+    s.id, s.position, s.isBlind,
+    CASE WHEN COUNT(t.id) > 0 THEN true ELSE false END
+)
+FROM Seat s
+LEFT JOIN TicketSeat ts ON s = ts.seat
+LEFT JOIN Ticket t ON ts.ticket = t AND t.deletedAt IS NULL AND t.game.id = :gameId
+WHERE s.section.id = :sectionId
+GROUP BY s.id, s.position, s.isBlind
+""")
+    List<SeatGetResponse> findSeatsWithBookingStatusBySectionIdAndGameIdV1(
+            @Param("sectionId") Long sectionId,
+            @Param("gameId") Long gameId
+    );
+
+    @Query(value = """
+    SELECT s.id AS id, s.position AS position, s.is_blind AS isBlind, CASE WHEN COUNT(t.id) > 0 THEN true ELSE false END AS isBooked
+    FROM seat s
+    LEFT JOIN ticket_seat ts ON s.id = ts.seat_id
+    LEFT JOIN ticket t ON ts.ticket_id = t.id AND t.deleted_at IS NULL AND t.game_id = :gameId
+    WHERE s.section_id = :sectionId
+    GROUP BY s.id, s.position, s.is_blind
+    """, nativeQuery = true)
+    List<Object[]> findSeatsWithBookingStatusBySectionIdAndGameIdV2(
+            @Param("sectionId") Long sectionId,
+            @Param("gameId") Long gameId
+    );
 
 }

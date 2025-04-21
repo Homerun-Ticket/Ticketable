@@ -15,7 +15,9 @@ public class GameCacheHelper {
     private final GameRepository gameRepository;
 
     // 캐시 무효화 전략
-    public boolean isEvictStrategy(Long gameId) {
+    public boolean isEvictStrategy(String key) {
+        String[] parts = key.split(":");
+        Long gameId = Long.parseLong(parts[0]);
         Game game = gameRepository.findById(gameId).orElseThrow(() -> new ServerException(ErrorCode.GAME_NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
         return now.isBefore(game.getTicketingStartTime().plusMinutes(30));

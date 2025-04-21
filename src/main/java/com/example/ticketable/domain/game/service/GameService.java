@@ -213,8 +213,20 @@ public class GameService {
         return gameRepository.findSectionSeatCountsBySectionIdV3(gameId, type);
     }
 
-    public List<SeatGetResponse> getSeatInfoBySection(Long sectionId, Long gameId) {
-        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameId(sectionId ,gameId);
+    public List<SeatGetResponse> getSeatInfoBySectionV0(Long sectionId, Long gameId) {
+        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameIdV0(sectionId ,gameId);
+    }
+
+    public List<SeatGetResponse> getSeatInfoBySectionV1(Long sectionId, Long gameId) {
+        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameIdV1(sectionId ,gameId);
+    }
+
+    public List<SeatGetResponse> getSeatInfoBySectionV2(Long sectionId, Long gameId) {
+        return gameCacheService.getSeatCached(gameId, sectionId);
+    }
+
+    public List<SeatGetResponse> getSeatInfoBySectionV3(Long sectionId, Long gameId) {
+        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameIdV3(sectionId ,gameId);
     }
 
     @Transactional
