@@ -6,16 +6,20 @@ import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.queue.QueueSystemConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class QueueManager {
 	private final WaitingQueueService waitingQueueService;
 	private final ProceedQueueService proceedQueueService;
 
+	public QueueManager(WaitingQueueService waitingQueueService, @Qualifier("redisProceedQueueServiceV2") ProceedQueueService proceedQueueService) {
+		this.waitingQueueService = waitingQueueService;
+		this.proceedQueueService = proceedQueueService;
+	}
 	//대기열 입장
 	public String enterWaitingQueue() {
 		return waitingQueueService.enterWaitingQueue();
