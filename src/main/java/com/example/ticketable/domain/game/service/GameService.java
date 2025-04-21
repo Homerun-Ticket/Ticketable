@@ -1,6 +1,5 @@
 package com.example.ticketable.domain.game.service;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ErrorCode;
 import com.example.ticketable.common.exception.ServerException;
@@ -19,6 +18,11 @@ import com.example.ticketable.domain.stadium.dto.response.SectionTypeSeatCountRe
 import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import com.example.ticketable.domain.stadium.entity.Stadium;
 import com.example.ticketable.domain.stadium.service.StadiumService;
+import lombok.RequiredArgsConstructor;
+import static com.example.ticketable.common.exception.ErrorCode.USER_ACCESS_DENIED;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import com.example.ticketable.domain.ticket.service.TicketService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,12 +32,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
@@ -44,6 +49,8 @@ public class GameService {
     private final AuctionService auctionService;
 
     private final ImageService imageService;
+
+    private final GameCacheService gameCacheService;
 
     private static final String GAME_FOLDER = "game/";
 
@@ -61,6 +68,7 @@ public class GameService {
                     .type(request.getType())
                     .point(request.getPoint())
                     .imagePath(imagePath)
+                    .ticketingStartTime((LocalDateTime.now().plusDays(7)))
                     .startTime(request.getStartTime())
                     .build()
             );
@@ -91,12 +99,54 @@ public class GameService {
                 .collect(Collectors.toList());
     }
 
-    public StadiumGetResponse getStadiumAndSectionSeatCounts(Long gameId) {
+    // 쿼라 병합 전 버전
+    public StadiumGetResponse getStadiumAndSectionSeatCountsV0(Long gameId) {
         Stadium stadium = gameRepository.getStadiumByGameId(gameId);
-        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameRepository.findUnBookedSeatsCountInSectionTypeByGameId(gameId);
+        List<SectionTypeSeatCountResponse> totalSeats = gameRepository.findTotalSeatsCountInSectionTypeByGameId(gameId);
+        Map<String, Long> totalMap = totalSeats.stream()
+                .collect(Collectors.toMap(SectionTypeSeatCountResponse::getSectionType, SectionTypeSeatCountResponse::getSeatCount));
+        List<SectionTypeSeatCountResponse> bookedSeats = gameRepository.findBookedSeatsCountInSectionTypeByGameId(gameId);
+        Map<String, Long> bookedMap = bookedSeats.stream()
+                .collect(Collectors.toMap(SectionTypeSeatCountResponse::getSectionType, SectionTypeSeatCountResponse::getSeatCount));
+
+        List<SectionTypeSeatCountResponse> result = totalMap.entrySet().stream()
+                .map(entry -> {
+                    String type = entry.getKey();
+                    Long total = entry.getValue();
+                    Long booked = bookedMap.getOrDefault(type, 0L);
+                    return new SectionTypeSeatCountResponse(type, total - booked);
+                })
+                .collect(Collectors.toList());
+
+        return StadiumGetResponse.of(stadium, result);
+    }
+
+    // JQPL 버전
+    public StadiumGetResponse getStadiumAndSectionSeatCountsV1(Long gameId) {
+        Stadium stadium = gameRepository.getStadiumByGameId(gameId);
+        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameRepository.findUnBookedSeatsCountInSectionTypeByGameIdV1(gameId);
+
 
         return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
     }
+
+    // Native 쿼리 버전
+    public StadiumGetResponse getStadiumAndSectionSeatCountsV2(Long gameId) {
+        Stadium stadium = gameRepository.getStadiumByGameId(gameId);
+        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameCacheService.getSectionSeatCountsCached(gameId);
+        return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
+    }
+
+
+
+    // QueryDSL 버전
+    public StadiumGetResponse getStadiumAndSectionSeatCountsV3(Long gameId) {
+        Stadium stadium = gameRepository.getStadiumByGameId(gameId);
+        List<SectionTypeSeatCountResponse> sectionBookedSeatCounts = gameRepository.findUnBookedSeatsCountInSectionTypeByGameIdV3(gameId);
+
+        return StadiumGetResponse.of(stadium, sectionBookedSeatCounts);
+    }
+
 
     public List<SectionSeatCountResponse> getAvailableSeatsBySectionType(Long gameId, String type) {
         return gameRepository.findSectionSeatCountsBySectionId(gameId, type);
@@ -115,10 +165,10 @@ public class GameService {
 
     @Transactional
     public void deleteGames(Long gameId) {
-           Game game = gameRepository.findById(gameId).orElseThrow(() -> new ServerException(ErrorCode.GAME_NOT_FOUND));
-           game.cancel();
-           ticketService.deleteAllTicketsByCanceledGame(gameId);
-           auctionService.deleteAllAuctionsByCanceledGame(gameId);
+        Game game = gameRepository.findById(gameId).orElseThrow(() -> new ServerException(ErrorCode.GAME_NOT_FOUND));
+        game.cancel();
+        ticketService.deleteAllTicketsByCanceledGame(gameId);
+        auctionService.deleteAllAuctionsByCanceledGame(gameId);
     }
 
     // 날짜 계산 메서드
@@ -127,4 +177,8 @@ public class GameService {
         LocalDateTime endOfDay = startOfDay.plusDays(1);
         return new LocalDateTime[] { startOfDay, endOfDay };
     }
+
+
+
+
 }

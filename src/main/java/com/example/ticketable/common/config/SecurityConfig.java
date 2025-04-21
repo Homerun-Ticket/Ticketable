@@ -47,6 +47,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/v1/stadiums/**").hasAuthority(MemberRole.Authority.ADMIN)
 				.requestMatchers("/api/v1/sections/**").hasAuthority(MemberRole.Authority.ADMIN)
 				.requestMatchers("/api/v1/seats/**").hasAuthority(MemberRole.Authority.ADMIN)
+				.requestMatchers("/actuator/prometheus").permitAll()
 				.anyRequest().authenticated()
 			);
 		

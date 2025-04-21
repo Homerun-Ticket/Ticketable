@@ -8,6 +8,7 @@ import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.event.SeatHoldReleaseEvent;
 import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.common.util.SeatHoldRedisUtil;
+import com.example.ticketable.domain.game.service.GameCacheService;
 import com.example.ticketable.domain.point.enums.PointHistoryType;
 import com.example.ticketable.domain.point.service.PointService;
 import com.example.ticketable.domain.ticket.dto.TicketContext;
@@ -35,11 +36,12 @@ public class TicketService {
 	private final TicketCreateService ticketCreateService;
 	private final SeatHoldRedisUtil seatHoldRedisUtil;
 	private final ApplicationEventPublisher eventPublisher;
+	private final GameCacheService gameCacheService;
 
 	@Transactional(readOnly = true)
-	public TicketResponse getTicket(Long ticketId) {
-		Ticket ticket = ticketRepository.findByIdWithGame(ticketId)
-			.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
+	public TicketResponse getTicket(Auth auth, Long ticketId) {
+		Ticket ticket = ticketRepository.findByIdAndMemberIdWithGame(ticketId, auth.getId())
+				.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 
 		return convertTicketResponse(ticket);
 	}
@@ -62,6 +64,8 @@ public class TicketService {
 		ticketPaymentService.paymentTicket(ticketContext);
 
 		eventPublisher.publishEvent(new SeatHoldReleaseEvent(ticketCreateRequest.getSeats(), ticketCreateRequest.getGameId()));
+		// 캐싱 추가
+		gameCacheService.handleAfterTicketChange(ticketCreateRequest.getGameId());
 		return ticketContext.toResponse();
 	}
 
@@ -70,7 +74,7 @@ public class TicketService {
 
 		// 1. 티켓 취소 처리
 		Ticket ticket = ticketRepository.findByIdWithMember(ticketId)
-			.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
+				.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 		if (auth.getRole() == ROLE_MEMBER && !auth.getId().equals(ticket.getMember().getId())) {
 			throw new ServerException(USER_ACCESS_DENIED);
 		}
@@ -81,6 +85,10 @@ public class TicketService {
 
 		// 3. 사용자 포인트 환불
 		pointService.increasePoint(ticket.getMember().getId(), refund, PointHistoryType.REFUND);
+
+		// 캐싱 삭제
+		Long gameId = ticket.getGame().getId();
+		gameCacheService.handleAfterTicketChange(gameId);
 	}
 
 	/**

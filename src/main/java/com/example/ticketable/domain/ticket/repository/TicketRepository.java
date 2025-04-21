@@ -10,10 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 	@Query("SELECT t "
-		+ "   FROM Ticket t JOIN FETCH t.game "
+		+ "   FROM Ticket t "
+		+ "   JOIN FETCH t.game "
 		+ "  WHERE t.id = :id "
+		+ "    AND t.member.id = :memberId "
 		+ "    AND t.deletedAt is null ")
-	Optional<Ticket> findByIdWithGame(Long id);
+	Optional<Ticket> findByIdAndMemberIdWithGame(Long id, Long memberId);
 
 	@Query("SELECT t "
 		+ "   FROM Ticket t JOIN FETCH t.member "
