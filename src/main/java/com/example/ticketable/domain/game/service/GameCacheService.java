@@ -28,15 +28,15 @@ public class GameCacheService {
 
 
     @Cacheable(value = "seatCountsBySectionType", key = "#gameId")
-    public List<SectionTypeSeatCountResponse> getSectionSeatCountsCached(Long gameId) {
+    public List<SectionTypeSeatCountResponse> getSeatCountsByTypeCached(Long gameId) {
         log.info("💡 캐시 미적중! DB에서 seat count 조회 - gameId: {}", gameId);
-        return gameRepository.findUnBookedSeatsCountInSectionTypeByGameIdV2(gameId);
+        return gameRepository.findSeatCountsByType(gameId);
     }
 
     @Cacheable(value = "seatCountsBySectionCode", key = "T(String).format('%s:%s', #gameId, #type)")
-    public List<SectionSeatCountResponse> getSectionCodeSeatCountsCached(Long gameId, String type) {
+    public List<SectionSeatCountResponse> getSeatCountsBySectionCached(Long gameId, String type) {
         log.info("💡 캐시 미적중! DB에서 seat count 조회 - gameId: {} - type {}", gameId, type);
-        return gameRepository.findSectionSeatCountsBySectionIdV2(gameId, type);
+        return gameRepository.findSeatCountsBySection(gameId, type);
     }
 
     @Cacheable(
@@ -45,16 +45,16 @@ public class GameCacheService {
     )
     public List<Game> getGamesCached(String team, LocalDateTime start, LocalDateTime end) {
         log.info("💡 캐시 미적중! DB에서 game 조회");
-        return gameRepository.findGamesV3(team, start, end);
+        return gameRepository.findGames(team, start, end);
     }
 
     @Cacheable(
             value = "seat",  // 캐시 이름
             key = "T(String).format('%s:%s', #gameId, #sectionId)"  // 조건 조합 key
     )
-    public List<SeatGetResponse> getSeatCached(Long sectionId, Long gameId) {
+    public List<SeatGetResponse> getSeatsCached(Long sectionId, Long gameId) {
         log.info("💡 캐시 미적중! DB에서 seat 조회");
-        return gameRepository.findSeatsWithBookingStatusBySectionIdAndGameIdV2(sectionId, gameId).stream()
+        return gameRepository.findSeatsInfo(sectionId, gameId).stream()
                 .map(row -> new SeatGetResponse(
                         ((Number) row[0]).longValue(),
                         (String) row[1],
@@ -73,7 +73,7 @@ public class GameCacheService {
             log.info("캐시 삭제");
         } else {
             List<SectionTypeSeatCountResponse> updated =
-                    gameRepository.findUnBookedSeatsCountInSectionTypeByGameIdV2(gameId);
+                    gameRepository.findSeatCountsByType(gameId);
             cache.put(gameId, updated);
             log.info("캐시 갱신");
         }
@@ -87,7 +87,7 @@ public class GameCacheService {
             log.info("캐시 삭제");
         } else {
             List<SectionSeatCountResponse> updated =
-                    gameRepository.findSectionSeatCountsBySectionIdV2(gameId, type);
+                    gameRepository.findSeatCountsBySection(gameId, type);
             cache.put(key, updated);
             log.info("캐시 갱신");
         }
@@ -101,7 +101,7 @@ public class GameCacheService {
             log.info("캐시 삭제");
         } else {
             List<SeatGetResponse> updated =
-                gameRepository.findSeatsWithBookingStatusBySectionIdAndGameIdV2(sectionId, gameId).stream()
+                gameRepository.findSeatsInfo(sectionId, gameId).stream()
                     .map(row -> new SeatGetResponse(
                             ((Number) row[0]).longValue(),
                             (String) row[1],
