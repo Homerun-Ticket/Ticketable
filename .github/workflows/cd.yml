@@ -104,7 +104,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
-          scp -i ssh_key .env ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/.env
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ssh_key .env ec2-user@${{ secrets.SSH_HOST }}:/home/ec2-user/.env
           rm -f ssh_key   # ssh_key 삭제
 
       # EC2에 SSH 로 접속해 배포 수행
