@@ -1,5 +1,6 @@
 package com.example.ticketable.domain.auction.entity;
 
+import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.entity.Timestamped;
 import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.ticket.entity.Ticket;
@@ -89,5 +90,13 @@ public class Auction extends Timestamped {
 
 	public boolean isNotOwner(Member requestMember) {
 		return !this.seller.equals(requestMember);
+	}
+
+	public boolean isBidPointEnough(Integer bidPoint) {
+		return this.bidPoint >= bidPoint;
+	}
+
+	public boolean isSameBidder(Member bidder) {
+		return this.bidder.equals(bidder);
 	}
 }

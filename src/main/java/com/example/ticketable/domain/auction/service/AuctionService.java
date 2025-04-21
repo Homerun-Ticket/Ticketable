@@ -126,34 +126,44 @@ public class AuctionService {
 			throw new ServerException(INVALID_BIDDING_AMOUNT);
 		}
 
-		// 3. 입찰자 포인트 확인 및 회수
-		pointService.decreasePoint(auth.getId(), dto.getCurrentBidPoint() + BID_UNIT, PointHistoryType.BID);
-
-		// 4. 경매가 종료된 경우 예외처리
+		// 3. 경매가 종료된 경우 예외처리
 		if (auction.isTimeOver()) {
 			expireAuction(auction);
 			throw new ServerException(AUCTION_TIME_OVER);
 		}
 
-		// 5. 경매 등록자와 입찰자가 같은 경우 예외처리
+		// 4. 경매 등록자와 입찰자가 같은 경우 예외처리
 		Member bidder = findMember(auth);
 		if (auction.isSameSellerAndBidder(bidder)) {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
-		// 6~7. 해당 경매기록에서, 가격이 같은 기록이 존재하면 예외처리 + 경매기록 저장
+		// 5. 시작가보다 낮은 금액 예외처리
+		if (auction.isBidPointEnough(dto.getCurrentBidPoint())) {
+			throw new ServerException(INVALID_BIDDING_AMOUNT);
+		}
+
+		// 6. 동일한 사람 연속입찰 예외처리
+		if (auction.isSameBidder(bidder)) {
+			throw new ServerException(AUCTION_ACCESS_DENIED);
+		}
+
+		// 7. 입찰자 포인트 확인 및 회수
+		pointService.decreasePoint(auth.getId(), dto.getCurrentBidPoint() + BID_UNIT, PointHistoryType.BID);
+
+		// 8~9. 해당 경매기록에서, 가격이 같은 기록이 존재하면 예외처리 + 경매기록 저장
 		auctionHistoryService.createAuctionHistory(auction, bidder, dto);
 
-		// 8. 이전 입찰자에게 입찰금 환급
+		// 10. 이전 입찰자에게 입찰금 환급
 		if (auction.hasBidder()) {
 			pointService.increasePoint(auction.getBidder().getId(), auction.getBidPoint(), PointHistoryType.BID_REFUND);
 		}
 
-		// 9. 입찰내용 업데이트
+		// 11. 입찰내용 업데이트
 		int nextBid = auction.getBidPoint() + BID_UNIT;
 		auction.updateBid(bidder, nextBid);
 
-		// 10. Event 발행을 통한 로직 실행순서 통제
+		// 12. Event 발행을 통한 로직 실행순서 통제
 		applicationEventPublisher.publishEvent(new BidUpdateEvent(auctionId, nextBid));
 
 		return AuctionResponse.of(auction);
