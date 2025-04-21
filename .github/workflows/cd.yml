@@ -121,6 +121,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."                                  # 배포 시작 로그
+            AWS_REGION="${{ secrets.AWS_REGION }}"
+            AWS_REGISTRY="${{ secrets.AWS_REGISTRY }}"
             echo "AWS_REGION: $AWS_REGION"
             echo "AWS_REGISTRY: $AWS_REGISTRY"
             SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
