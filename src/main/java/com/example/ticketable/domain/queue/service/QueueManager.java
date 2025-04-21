@@ -6,16 +6,20 @@ import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.queue.QueueSystemConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class QueueManager {
 	private final WaitingQueueService waitingQueueService;
 	private final ProceedQueueService proceedQueueService;
 
+	public QueueManager(WaitingQueueService waitingQueueService, @Qualifier("redisProceedQueueServiceV2") ProceedQueueService proceedQueueService) {
+		this.waitingQueueService = waitingQueueService;
+		this.proceedQueueService = proceedQueueService;
+	}
 	//대기열 입장
 	public String enterWaitingQueue() {
 		return waitingQueueService.enterWaitingQueue();
@@ -27,7 +31,7 @@ public class QueueManager {
 		boolean isProceed = proceedQueueService.isContains(token);
 		//대기열, 작업열 에 존재하지않으면 잘못된 토큰
 		if(waitingOrder == -1 && !isProceed) {
-			log.info("token is : {}", token);
+			log.warn("{} : {}", INVALID_WAITING_TOKEN.getMessage(), token);
 			throw new ServerException(INVALID_WAITING_TOKEN);
 		}
 		return waitingOrder;
@@ -45,6 +49,11 @@ public class QueueManager {
 	public void deleteTokenFromWaitingAndProceedQueue(String token) {
 		waitingQueueService.removeToken(token);
 		proceedQueueService.removeToken(token);
+	}
+
+	public long getExpectedWaitingOrder(long currentWaitingOrder) {
+		double v = QueueSystemConstants.PROCEED_QUEUE_TARGET_SIZE * 0.8;
+		return (long) Math.floor(currentWaitingOrder / v) + 1;
 	}
 
 	@Scheduled(fixedRate = 1000)
