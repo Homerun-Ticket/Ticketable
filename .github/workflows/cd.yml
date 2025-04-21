@@ -110,6 +110,9 @@ jobs:
       # EC2에 SSH 로 접속해 배포 수행
       - name: SSH Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGISTRY: ${{ secrets.AWS_REGISTRY }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
