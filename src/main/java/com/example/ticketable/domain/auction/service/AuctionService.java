@@ -138,7 +138,7 @@ public class AuctionService {
 			throw new ServerException(AUCTION_ACCESS_DENIED);
 		}
 
-		// 5. 시작가보다 낮은 금액 예외처리
+		// 5. 입찰가보다 낮은 금액 예외처리
 		if (auction.isBidPointEnough(dto.getCurrentBidPoint())) {
 			throw new ServerException(INVALID_BIDDING_AMOUNT);
 		}
