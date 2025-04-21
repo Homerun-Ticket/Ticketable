@@ -25,7 +25,7 @@ public class PointAdminController {
 		return ResponseEntity.ok(pointAdminService.exchangePoint(auth, pointHistoryId));
 	}
 	
-	@GetMapping("v1/admin/pointHistory/{pointHistoryId}")
+	@GetMapping("/v1/admin/pointHistory/{pointHistoryId}")
 	public ResponseEntity<PointHistoryResponse> getAdminPoint(
 		@AuthenticationPrincipal Auth auth,
 		@PathVariable Long pointHistoryId
@@ -33,7 +33,7 @@ public class PointAdminController {
 		return ResponseEntity.ok(pointAdminService.getAdminPoint(auth, pointHistoryId));
 	}
 	
-	@GetMapping("v1/admin/pointHistory")
+	@GetMapping("/v1/admin/pointHistory")
 	public ResponseEntity<PagedModel<PointHistoryResponse>> getAdminPoints(
 		@AuthenticationPrincipal Auth auth,
 		@RequestParam int page

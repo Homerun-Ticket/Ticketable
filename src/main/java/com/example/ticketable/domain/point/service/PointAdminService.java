@@ -2,7 +2,6 @@ package com.example.ticketable.domain.point.service;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.domain.member.entity.Member;
 import com.example.ticketable.domain.point.dto.response.PointAdminResponse;
 import com.example.ticketable.domain.point.dto.response.PointHistoryResponse;
 import com.example.ticketable.domain.point.entity.Point;
@@ -44,7 +43,6 @@ public class PointAdminService {
 		Point point = pointRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 		
-		point.minusPoint(pointHistory.getCharge());
 		pointHistory.exchange();
 		
 		return new PointAdminResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
