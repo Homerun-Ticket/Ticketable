@@ -38,6 +38,8 @@ public class SeatService {
 
     private final TicketSeatService ticketSeatService;
 
+    private final SeatValidator seatValidator;
+
     @Transactional
     public List<SeatCreateResponse> createSeats(Long stadiumId, Long sectionId, SeatCreateRequest request) {
         Stadium stadium = stadiumService.getStadium(stadiumId);
@@ -110,6 +112,7 @@ public class SeatService {
     }
 
     public void holdSeat(Auth auth, SeatHoldRequest seatHoldRequest) {
+        seatValidator.validateSeatsBelongToGame(seatHoldRequest.getGameId(), seatHoldRequest.getSeatIds());
         ticketSeatService.checkDuplicateSeats(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId());
         seatHoldRedisUtil.holdSeatAtomic(seatHoldRequest.getSeatIds(), seatHoldRequest.getGameId(), String.valueOf(auth.getId()));
     }
