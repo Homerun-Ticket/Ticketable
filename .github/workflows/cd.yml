@@ -116,6 +116,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Starting deployment..."                                  # 배포 시작 로그
+            echo "AWS_REGION: $AWS_REGION"
+            echo "AWS_REGISTRY: $AWS_REGISTRY"
             SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
             IMAGE_TAG="test-$SHORT_SHA"
             IMAGE_NAME="$AWS_REGISTRY/repo-ticketable:$IMAGE_TAG"
