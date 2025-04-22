@@ -27,13 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class SeatController {
     private final SeatService seatService;
 
-    @PostMapping("/v1/stadiums/{stadiumId}/sections/{sectionId}/seats")
+    @PostMapping("/v1/sections/{sectionId}/seats")
     public ResponseEntity<List<SeatCreateResponse>> createSeats(
-            @PathVariable Long stadiumId,
             @PathVariable Long sectionId,
             @RequestBody SeatCreateRequest request
     ) {
-        return ResponseEntity.ok(seatService.createSeats(stadiumId, sectionId, request));
+        return ResponseEntity.ok(seatService.createSeats(sectionId, request));
     }
 
     @PutMapping("/v1/seats/{seatId}")

@@ -1,6 +1,5 @@
 package com.example.ticketable.domain.game.controller;
 
-import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.domain.game.dto.request.GameCreateRequest;
 import com.example.ticketable.domain.game.dto.request.GameUpdateRequest;
 import com.example.ticketable.domain.game.dto.response.GameCreateResponse;
@@ -13,7 +12,6 @@ import com.example.ticketable.domain.stadium.dto.response.StadiumGetResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +32,7 @@ public class GameController {
         return ResponseEntity.ok(gameService.createGame(request, file));
     }
 
-    @GetMapping("/v1/games")
+    @GetMapping("/v3/games")
     public ResponseEntity<List<GameGetResponse>> getGames(
             @RequestParam (required = false) String team,
             @RequestParam (required = false) LocalDateTime date
@@ -42,49 +40,27 @@ public class GameController {
         return ResponseEntity.ok(gameService.getGames(team, date));
     }
 
-    @GetMapping("/v0/games/{gameId}")
-    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV0(
-            @PathVariable Long gameId
-    ) {
-        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV0(gameId));
-    }
-
-    @GetMapping("/v1/games/{gameId}")
-    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCounts(
-            @PathVariable Long gameId
-    ) {
-        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV1(gameId));
-    }
-
     @GetMapping("/v2/games/{gameId}")
     public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV2(
             @PathVariable Long gameId
     ) {
-        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV2(gameId));
+        return ResponseEntity.ok(gameService.getSeatCountsByType(gameId));
     }
 
-    @GetMapping("/v3/games/{gameId}")
-    public ResponseEntity<StadiumGetResponse> getStadiumAndSectionSeatCountsV3(
-            @PathVariable Long gameId
-    ) {
-        return ResponseEntity.ok(gameService.getStadiumAndSectionSeatCountsV3(gameId));
-    }
-
-
-    @GetMapping("/v1/games/{gameId}/sectionTypes")
-    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionType(
+    @GetMapping("/v2/games/{gameId}/sectionTypes")
+    public ResponseEntity<List<SectionSeatCountResponse>> getAvailableSeatsBySectionTypeV2(
             @PathVariable Long gameId,
             @RequestParam String type
     ) {
-        return ResponseEntity.ok(gameService.getAvailableSeatsBySectionType(gameId, type));
+        return ResponseEntity.ok(gameService.getSeatCountsBySection(gameId, type));
     }
 
-    @GetMapping("/v1/games/{gameId}/sections/{sectionId}")
-    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySection(
+    @GetMapping("/v2/games/{gameId}/sections/{sectionId}")
+    public ResponseEntity<List<SeatGetResponse>> getSeatInfoBySectionV2(
             @PathVariable Long gameId,
             @PathVariable Long sectionId
     ) {
-        return ResponseEntity.ok(gameService.getSeatInfoBySection(sectionId, gameId));
+        return ResponseEntity.ok(gameService.getSeats(sectionId, gameId));
     }
 
     @PutMapping("/v1/games/{gameId}")

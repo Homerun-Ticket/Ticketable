@@ -41,4 +41,8 @@ public class TicketSeatService {
 	public void deleteAllTicketSeats(Long ticketId) {
 		ticketSeatRepository.deleteAllByTicketId(ticketId);
 	}
+
+	public List<Seat> getSeat(Long ticketId) {
+		return ticketSeatRepository.findByTicketId(ticketId);
+	}
 }
