@@ -93,7 +93,7 @@ jobs:
           docker buildx build \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t $AWS_REGISTRY/repo-ticketable:test-$SHORT_SHA \
+            -t $AWS_REGISTRY/repo-ticketable:$SHORT_SHA \
             --push .
 
       # GitHub Action 러너에서 생성된 .env 파일을 EC2로 복사
