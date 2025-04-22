@@ -34,7 +34,7 @@ public class GameRepositoryQueryImpl implements GameRepositoryQuery {
                         game.ticketingStartTime.loe(LocalDateTime.now()),
                         start == null ? null : game.startTime.goe(start),
                         end == null ? null : game.startTime.loe(end),
-                        team == null ? null : game.home.eq(team)
+                        team == null ? null : game.home.eq(team).or(game.away.eq(team))
                 )
                 .fetch();
     }
