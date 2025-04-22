@@ -67,7 +67,7 @@ jobs:
           echo "IMPORT_API_KEY=${{ secrets.IMPORT_API_KEY }}" >> .env
           echo "IMPORT_API_SECRET=${{ secrets.IMPORT_API_SECRET }}" >> .env
           echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
-          echo "REGION_VALUE=${{ secrets.REGION_VALUE }}" >> .env
+          echo "SPRING_CLOUD_AWS_REGION_STATIC=${{ secrets.REGION_VALUE }}" >> .env
           echo "SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${{ secrets.ACCESS_KEY }}" >> .env
           echo "SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
           echo "AWS_REGISTRY=${{ secrets.AWS_REGISTRY }}" >> .env
