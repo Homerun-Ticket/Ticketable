@@ -42,8 +42,8 @@ public class TicketService {
 	private final SeatService seatService;
 
 	@Transactional(readOnly = true)
-	public TicketResponse getTicket(Long ticketId) {
-		Ticket ticket = ticketRepository.findByIdWithGame(ticketId)
+	public TicketResponse getTicket(Auth auth, Long ticketId) {
+		Ticket ticket = ticketRepository.findByIdAndMemberIdWithGame(ticketId, auth.getId())
 				.orElseThrow(() -> new ServerException(TICKET_NOT_FOUND));
 
 		return convertTicketResponse(ticket);

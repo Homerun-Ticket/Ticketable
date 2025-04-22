@@ -89,4 +89,12 @@ public class LuaScriptConfig {
 		script.setLocation(new ClassPathResource("lua/moveWaitingToProceed.lua"));
 		return script;
 	}
+
+	@Bean
+	public DefaultRedisScript<Long> moveWaitingToProceedScriptV2(){
+		DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+		script.setResultType(Long.class);
+		script.setLocation(new ClassPathResource("lua/moveWaitingToProceedV2.lua"));
+		return script;
+	}
 }
