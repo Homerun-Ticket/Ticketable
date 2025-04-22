@@ -2,26 +2,23 @@
 name: CD
 
 # main 브랜치로 PR이 닫힐 때 실행
-#on:
-#  pull_request:
-#    branches: ["main"]
-#    types: [closed]
-
-# test/cicd 브랜치에 푸시할 때 실행
 on:
-  push:
-    branches: ["test/cicd"]
+  pull_request:
+    branches: ["main"]
+    types: [closed]
 
 # CD 작업 정의
 jobs:
   deploy:
+    # PR이 merge 된 경우에만 실행
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest    # Ubuntu 최신 버전에서 실행
     steps:
       # main 브랜치의 최신 상태로 체크아웃
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: test/cicd
+          ref: main
 
       # JDK 17 환경 설정 (Corretto 사용)
       - name: Set up JDK 17
@@ -119,7 +116,7 @@ jobs:
             AWS_REGION="${{ secrets.AWS_REGION }}"
             AWS_REGISTRY="${{ secrets.AWS_REGISTRY }}"
             SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
-            IMAGE_TAG="test-$SHORT_SHA"
+            IMAGE_TAG="$SHORT_SHA"
             IMAGE_NAME="$AWS_REGISTRY/repo-ticketable:$IMAGE_TAG"
             echo "Pulling image: $IMAGE_NAME"
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_REGISTRY" || { echo "ECR login failed"; exit 1; }
