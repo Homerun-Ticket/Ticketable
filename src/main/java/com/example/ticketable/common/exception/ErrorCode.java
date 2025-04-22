@@ -24,6 +24,7 @@ public enum ErrorCode {
 	// 경기
 	GAME_NOT_FOUND("해당하는 경기를 찾을 수 없습니다.", NOT_FOUND),
 	GAME_SAVE_FAILED("경기 저장 실패", INTERNAL_SERVER_ERROR),
+	INVALID_TICKETING_START_TIME("경기 시작 시간이 유효하지 않습니다. (최소 7일 이후)", BAD_REQUEST),
 
 	// 이미지
 	IMAGE_UPLOAD_FAILED("S3 이미지 업로드 실패", INTERNAL_SERVER_ERROR),

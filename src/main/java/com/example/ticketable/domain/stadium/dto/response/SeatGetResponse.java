@@ -9,11 +9,11 @@ public class SeatGetResponse {
 
     private final String position;
 
-    private final boolean isBlind;
+    private final Boolean isBlind;
 
-    private final boolean isBooked;
+    private final Boolean isBooked;
 
-    public SeatGetResponse(Long id, String position, boolean isBlind, boolean isBooked) {
+    public SeatGetResponse(Long id, String position, Boolean isBlind, Boolean isBooked) {
         this.id = id;
         this.position = position;
         this.isBlind = isBlind;
