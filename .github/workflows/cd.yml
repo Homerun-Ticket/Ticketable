@@ -68,6 +68,8 @@ jobs:
           echo "IMPORT_API_SECRET=${{ secrets.IMPORT_API_SECRET }}" >> .env
           echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
           echo "REGION_VALUE=${{ secrets.REGION_VALUE }}" >> .env
+          echo "ACCESS_KEY=${{ secrets.ACCESS_KEY }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
           echo "AWS_REGISTRY=${{ secrets.AWS_REGISTRY }}" >> .env
           echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
 
