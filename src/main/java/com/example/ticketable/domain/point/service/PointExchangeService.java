@@ -2,7 +2,7 @@ package com.example.ticketable.domain.point.service;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.domain.point.dto.response.PointAdminResponse;
+import com.example.ticketable.domain.point.dto.response.PointExchangeResponse;
 import com.example.ticketable.domain.point.dto.response.PointHistoryResponse;
 import com.example.ticketable.domain.point.entity.Point;
 import com.example.ticketable.domain.point.entity.PointHistory;
@@ -22,13 +22,13 @@ import static com.example.ticketable.domain.point.enums.PointHistoryType.EXCHANG
 
 @Service
 @RequiredArgsConstructor
-public class PointAdminService {
+public class PointExchangeService {
 	
 	private final PointHistoryRepository pointHistoryRepository;
 	private final PointRepository pointRepository;
 	
 	@Transactional
-	public PointAdminResponse exchangePoint(Auth auth, Long pointHistoryId) {
+	public PointExchangeResponse exchangePoint(Auth auth, Long pointHistoryId) {
 		auth.checkAdmin();
 		
 		PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
@@ -44,11 +44,11 @@ public class PointAdminService {
 		
 		pointHistory.exchange();
 		
-		return new PointAdminResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
+		return new PointExchangeResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
 	}
 	
 	@Transactional(readOnly = true)
-	public PointHistoryResponse getAdminPoint(Auth auth, Long pointHistoryId) {
+	public PointHistoryResponse getExchangeRequestPointHistory(Auth auth, Long pointHistoryId) {
 		auth.checkAdmin();
 		PointHistory pointHistory = getPointHistory(pointHistoryId);
 		
@@ -56,7 +56,7 @@ public class PointAdminService {
 	}
 	
 	@Transactional(readOnly = true)
-	public PagedModel<PointHistoryResponse> getAdminPoints(Auth auth, int page) {
+	public PagedModel<PointHistoryResponse> getExchangeRequestPointHistories(Auth auth, int page) {
 		auth.checkAdmin();
 		
 		Pageable pageable = PageRequest.of(page - 1, 10,
