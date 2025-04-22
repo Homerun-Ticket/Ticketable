@@ -5,7 +5,7 @@ name: CI
 on:
   pull_request:
     branches: ["develop", "main"]
-    types: [opened, synchronized]    # PR이 열렸을 때와 코드가 업데이트 되었을 때 실행
+    types: [opened, synchronize]    # PR이 열렸을 때와 코드가 업데이트 되었을 때 실행
 
 # CI 작업 정의
 jobs:
