@@ -47,6 +47,12 @@ public class PointService {
 		return new PointResponse(authId, request.getPoint());
 	}
 	
+	@Transactional(readOnly = true)
+	public PointResponse getMemberPoint(Long authId) {
+		Point point = getPoint(authId);
+		return PointResponse.of(point);
+	}
+	
 	@Transactional
 	public void createPoint(Member member) {
 		Point point = Point.builder()
