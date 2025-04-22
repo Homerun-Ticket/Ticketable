@@ -21,12 +21,12 @@ public interface GameRepository extends JpaRepository<Game, Long>, GameRepositor
 SELECT 
     s.type AS section_type,
     COUNT(seat.id) - COUNT(t.id) AS remaining_seats
-FROM Seat seat
-JOIN Section s ON seat.section_id = s.id
-JOIN Stadium st ON s.stadium_id = st.id
-JOIN Game g ON g.stadium_id = st.id
-LEFT JOIN Ticket_Seat ts ON ts.seat_id = seat.id
-LEFT JOIN Ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
+FROM seat seat
+JOIN section s ON seat.section_id = s.id
+JOIN stadium st ON s.stadium_id = st.id
+JOIN game g ON g.stadium_id = st.id
+LEFT JOIN ticket_seat ts ON ts.seat_id = seat.id
+LEFT JOIN ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
 WHERE g.id = :gameId
 GROUP BY s.type
 """, nativeQuery = true)
@@ -39,12 +39,12 @@ GROUP BY s.type
 SELECT
     s.code AS section_code,
     COUNT(seat.id) - COUNT(t.id) AS remaining_seats
-FROM Seat seat
-JOIN Section s ON seat.section_id = s.id
-JOIN Stadium st ON s.stadium_id = st.id
-JOIN Game g ON g.stadium_id = st.id
-LEFT JOIN Ticket_Seat ts ON ts.seat_id = seat.id
-LEFT JOIN Ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
+FROM seat seat
+JOIN section s ON seat.section_id = s.id
+JOIN stadium st ON s.stadium_id = st.id
+JOIN game g ON g.stadium_id = st.id
+LEFT JOIN ticket_seat ts ON ts.seat_id = seat.id
+LEFT JOIN ticket t ON ts.ticket_id = t.id AND t.game_id = :gameId AND t.deleted_at IS NULL
 WHERE g.id = :gameId
  AND s.type = :type
 GROUP BY s.id
