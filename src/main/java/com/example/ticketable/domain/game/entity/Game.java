@@ -22,22 +22,26 @@ public class Game {
 	@JoinColumn(name = "stadium_id", nullable = false)
 	private Stadium stadium;
 
-	@Column(length = 50)
+	@Column(length = 50, nullable = false)
 	private String away;
 
-	@Column(length = 50)
+	@Column(length = 50, nullable = false)
 	private String home;
 
-	@Column(length = 20)
+	@Column(length = 20, nullable = false)
 	@Enumerated(EnumType.STRING)
 	private GameType type;
 
+	@Column(nullable = false)
 	private Integer point;
 
+	@Column(nullable = false)
 	private String imagePath;
 
+	@Column(nullable = false)
 	private LocalDateTime startTime;
 
+	@Column(nullable = false)
 	private LocalDateTime ticketingStartTime;
 
 	private LocalDateTime deletedAt;
