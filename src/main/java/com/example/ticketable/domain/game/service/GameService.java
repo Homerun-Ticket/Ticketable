@@ -119,6 +119,7 @@ public class GameService {
         game.cancel();
         ticketService.deleteAllTicketsByCanceledGame(gameId);
         auctionService.deleteAllAuctionsByCanceledGame(gameId);
+        gameCacheService.clearAllGameCaches();
     }
 
     // 날짜 계산 메서드
