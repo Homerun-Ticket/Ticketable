@@ -32,15 +32,12 @@ public class SeatService {
 
     private final SectionService sectionService;
 
-    private final StadiumService stadiumService;
-
     private final SeatHoldRedisUtil seatHoldRedisUtil;
 
     private final TicketSeatService ticketSeatService;
 
     @Transactional
-    public List<SeatCreateResponse> createSeats(Long stadiumId, Long sectionId, SeatCreateRequest request) {
-        Stadium stadium = stadiumService.getStadium(stadiumId);
+    public List<SeatCreateResponse> createSeats(Long sectionId, SeatCreateRequest request) {
         Section section = sectionService.getById(sectionId);
 
         if (seatRepository.existsBySectionId(sectionId)){
@@ -75,7 +72,7 @@ public class SeatService {
                 seatList.add(SeatCreateResponse.of(seat));
             }
         }
-        stadium.updateCapacity(sum);
+        section.getStadium().updateCapacity(sum);
         return seatList;
     }
 

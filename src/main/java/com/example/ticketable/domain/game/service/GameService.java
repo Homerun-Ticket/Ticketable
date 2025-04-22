@@ -52,6 +52,9 @@ public class GameService {
         String originalFilename = file.getOriginalFilename();
         String fileKey = GAME_FOLDER + UUID.randomUUID()+ "_" + originalFilename;
         String imagePath = imageService.saveFile(file, fileKey);
+        if (request.getStartTime().minusDays(7).isBefore(LocalDateTime.now())){
+            throw new ServerException(ErrorCode.INVALID_TICKETING_START_TIME);
+        }
         try {
             Stadium stadium = stadiumService.getStadium(request.getStadiumId());
             Game game = gameRepository.save(Game.builder()
@@ -61,7 +64,7 @@ public class GameService {
                     .type(request.getType())
                     .point(request.getPoint())
                     .imagePath(imagePath)
-                    .ticketingStartTime((LocalDateTime.now().plusDays(7)))
+                    .ticketingStartTime((request.getStartTime().minusDays(7)))
                     .startTime(request.getStartTime())
                     .build()
             );
