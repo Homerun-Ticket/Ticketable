@@ -1,5 +1,7 @@
 package com.example.ticketable.common.entity;
 
+import com.example.ticketable.common.exception.ErrorCode;
+import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.role.MemberRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,5 +22,11 @@ public class Auth {
 		this.email = email;
 		this.role = role;
 		this.authority = List.of(new SimpleGrantedAuthority(role.name()));
+	}
+	
+	public void checkAdmin() {
+		if (!role.equals(MemberRole.ROLE_ADMIN)) {
+			throw new ServerException(ErrorCode.USER_ACCESS_DENIED);
+		}
 	}
 }
