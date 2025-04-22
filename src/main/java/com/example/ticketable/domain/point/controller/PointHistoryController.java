@@ -19,7 +19,7 @@ public class PointHistoryController {
 
 	private final PointHistoryService pointHistoryService;
 	
-	@GetMapping("/v1/points")
+	@GetMapping("/v1/pointHistories")
 	public ResponseEntity<PagedModel<PointHistoryResponse>> getPointHistories(
 		@AuthenticationPrincipal Auth auth,
 		@RequestParam int page
