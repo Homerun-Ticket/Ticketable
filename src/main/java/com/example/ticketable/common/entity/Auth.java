@@ -23,10 +23,4 @@ public class Auth {
 		this.role = role;
 		this.authority = List.of(new SimpleGrantedAuthority(role.name()));
 	}
-	
-	public void checkAdmin() {
-		if (!role.equals(MemberRole.ROLE_ADMIN)) {
-			throw new ServerException(ErrorCode.USER_ACCESS_DENIED);
-		}
-	}
 }

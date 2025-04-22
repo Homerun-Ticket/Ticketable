@@ -20,10 +20,10 @@ public class PointHistoryController {
 	private final PointHistoryService pointHistoryService;
 	
 	@GetMapping("/v1/points")
-	public ResponseEntity<PagedModel<PointHistoryResponse>> getPoints(
+	public ResponseEntity<PagedModel<PointHistoryResponse>> getPointHistories(
 		@AuthenticationPrincipal Auth auth,
 		@RequestParam int page
 	) {
-		return ResponseEntity.ok(pointHistoryService.getPoints(auth.getId(), page));
+		return ResponseEntity.ok(pointHistoryService.getPointHistories(auth.getId(), page));
 	}
 }

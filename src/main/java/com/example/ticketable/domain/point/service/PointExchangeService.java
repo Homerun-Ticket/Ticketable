@@ -29,8 +29,6 @@ public class PointExchangeService {
 	
 	@Transactional
 	public PointExchangeResponse exchangePoint(Auth auth, Long pointHistoryId) {
-		auth.checkAdmin();
-		
 		PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
 			.orElseThrow(() -> new ServerException(POINT_HISTORY_NOT_FOUND));
 		
@@ -49,16 +47,12 @@ public class PointExchangeService {
 	
 	@Transactional(readOnly = true)
 	public PointHistoryResponse getExchangeRequestPointHistory(Auth auth, Long pointHistoryId) {
-		auth.checkAdmin();
 		PointHistory pointHistory = getPointHistory(pointHistoryId);
-		
 		return PointHistoryResponse.of(pointHistory);
 	}
 	
 	@Transactional(readOnly = true)
 	public PagedModel<PointHistoryResponse> getExchangeRequestPointHistories(Auth auth, int page) {
-		auth.checkAdmin();
-		
 		Pageable pageable = PageRequest.of(page - 1, 10,
 			Sort.by(Sort.Direction.ASC, "createdAt"));
 		
