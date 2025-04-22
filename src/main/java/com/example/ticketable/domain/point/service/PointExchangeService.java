@@ -2,8 +2,7 @@ package com.example.ticketable.domain.point.service;
 
 import com.example.ticketable.common.entity.Auth;
 import com.example.ticketable.common.exception.ServerException;
-import com.example.ticketable.domain.member.entity.Member;
-import com.example.ticketable.domain.point.dto.response.PointAdminResponse;
+import com.example.ticketable.domain.point.dto.response.PointExchangeResponse;
 import com.example.ticketable.domain.point.dto.response.PointHistoryResponse;
 import com.example.ticketable.domain.point.entity.Point;
 import com.example.ticketable.domain.point.entity.PointHistory;
@@ -19,20 +18,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.ticketable.common.exception.ErrorCode.*;
-import static com.example.ticketable.domain.member.role.MemberRole.ROLE_ADMIN;
 import static com.example.ticketable.domain.point.enums.PointHistoryType.EXCHANGE_REQUEST;
 
 @Service
 @RequiredArgsConstructor
-public class PointAdminService {
+public class PointExchangeService {
 	
 	private final PointHistoryRepository pointHistoryRepository;
 	private final PointRepository pointRepository;
 	
 	@Transactional
-	public PointAdminResponse exchangePoint(Auth auth, Long pointHistoryId) {
-		checkAdmin(auth);
-		
+	public PointExchangeResponse exchangePoint(Auth auth, Long pointHistoryId) {
 		PointHistory pointHistory = pointHistoryRepository.findById(pointHistoryId)
 			.orElseThrow(() -> new ServerException(POINT_HISTORY_NOT_FOUND));
 		
@@ -44,36 +40,25 @@ public class PointAdminService {
 		Point point = pointRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new ServerException(USER_NOT_FOUND));
 		
-		point.minusPoint(pointHistory.getCharge());
 		pointHistory.exchange();
 		
-		return new PointAdminResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
+		return new PointExchangeResponse(memberId, pointHistory.getCharge(), point.getPoint(), pointHistory.getType());
 	}
 	
 	@Transactional(readOnly = true)
-	public PointHistoryResponse getAdminPoint(Auth auth, Long pointHistoryId) {
-		checkAdmin(auth);
+	public PointHistoryResponse getExchangeRequestPointHistory(Auth auth, Long pointHistoryId) {
 		PointHistory pointHistory = getPointHistory(pointHistoryId);
-		
 		return PointHistoryResponse.of(pointHistory);
 	}
 	
 	@Transactional(readOnly = true)
-	public PagedModel<PointHistoryResponse> getAdminPoints(Auth auth, int page) {
-		checkAdmin(auth);
-		
+	public PagedModel<PointHistoryResponse> getExchangeRequestPointHistories(Auth auth, int page) {
 		Pageable pageable = PageRequest.of(page - 1, 10,
 			Sort.by(Sort.Direction.ASC, "createdAt"));
 		
 		Page<PointHistory> points = pointHistoryRepository.findAllByType(EXCHANGE_REQUEST, pageable);
 		
 		return new PagedModel<>(points.map(PointHistoryResponse::of));
-	}
-	
-	private void checkAdmin(Auth auth) {
-		if (!auth.getRole().equals(ROLE_ADMIN)) {
-			throw new ServerException(USER_ACCESS_DENIED);
-		}
 	}
 	
 	private PointHistory getPointHistory(Long pointHistoryId) {

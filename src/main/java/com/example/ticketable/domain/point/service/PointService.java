@@ -28,6 +28,10 @@ public class PointService {
 	 */
 	@Transactional
 	public PointResponse exchangePoint(Long authId, ExchangePointRequest request) {
+		if(request.getPoint() < 100) {
+			throw new ServerException(CAN_NOT_EXCHANGE);
+		}
+		
 		Point point = getPoint(authId);
 		if (point.getPoint() < request.getPoint()) {
 			throw new ServerException(NOT_ENOUGH_POINT);
@@ -38,8 +42,15 @@ public class PointService {
 		}
 		Member member = Member.fromAuth(authId);
 		
+		point.minusPoint(request.getPoint());
 		pointHistoryService.createPointHistory(request.getPoint(), EXCHANGE_REQUEST, member);
 		return new PointResponse(authId, request.getPoint());
+	}
+	
+	@Transactional(readOnly = true)
+	public PointResponse getMemberPoint(Long authId) {
+		Point point = getPoint(authId);
+		return PointResponse.of(point);
 	}
 	
 	@Transactional

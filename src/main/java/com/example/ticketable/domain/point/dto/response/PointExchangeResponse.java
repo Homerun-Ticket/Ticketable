@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class PointAdminResponse {
+public class PointExchangeResponse {
 
 	private final Long memberId;
 	private final Integer charge;

@@ -24,4 +24,9 @@ public class PointController {
 	) {
 		return ResponseEntity.ok(pointService.exchangePoint(auth.getId(), request));
 	}
+	
+	@GetMapping("/v1/points")
+	public ResponseEntity<PointResponse> getMemberPoint(@AuthenticationPrincipal Auth auth) {
+		return ResponseEntity.ok(pointService.getMemberPoint(auth.getId()));
+	}
 }

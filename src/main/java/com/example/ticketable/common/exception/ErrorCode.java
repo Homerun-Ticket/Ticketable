@@ -54,6 +54,7 @@ public enum ErrorCode {
 	EXCHANGE_REQUEST_NOT_STATE("환전 요청 상태가 아닙니다.", BAD_REQUEST),
 	PAYMENT_NOT_SUCCESS("아직 결제가 완료되지 않았습니다.", BAD_REQUEST),
 	PAYMENT_VALID_ERROR("결제 검증중 오류가 발생했습니다.", INTERNAL_SERVER_ERROR),
+	CAN_NOT_EXCHANGE("100원 미만은 환불이 불가능합니다.", BAD_REQUEST),
 
 	// 유저
 	USER_EMAIL_DUPLICATION("다른 유저와 이메일이 중복됩니다.", CONFLICT),

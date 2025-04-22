@@ -1,5 +1,7 @@
 package com.example.ticketable.common.entity;
 
+import com.example.ticketable.common.exception.ErrorCode;
+import com.example.ticketable.common.exception.ServerException;
 import com.example.ticketable.domain.member.role.MemberRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
