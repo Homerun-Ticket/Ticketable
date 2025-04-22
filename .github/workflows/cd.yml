@@ -59,19 +59,19 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "spring.datasource.url=${{ secrets.DB_URL }}" >> .env
-          echo "spring.datasource.username=${{ secrets.DB_USERNAME }}" >> .env
-          echo "spring.datasource.password=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "jwt.secret.key=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "jwt.access.token=${{ secrets.JWT_ACCESS_TOKEN }}" >> .env
-          echo "import.api.key=${{ secrets.IMPORT_API_KEY }}" >> .env
-          echo "import.api.secret=${{ secrets.IMPORT_API_SECRET }}" >> .env
-          echo "spring.cloud.aws.s3.bucketName=${{ secrets.BUCKET_NAME }}" >> .env
-          echo "spring.cloud.aws.region.static=${{ secrets.REGION_VALUE }}" >> .env
-          echo "spring.cloud.aws.credentials.access-key=${{ secrets.ACCESS_KEY }}" >> .env
-          echo "spring.cloud.aws.credentials.secret-key=${{ secrets.SECRET_KEY }}" >> .env
-          echo "aws_registry=${{ secrets.AWS_REGISTRY }}" >> .env
-          echo "aws_region=${{ secrets.AWS_REGION }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "JWT_ACCESS_TOKEN=${{ secrets.JWT_ACCESS_TOKEN }}" >> .env
+          echo "IMPORT_API_KEY=${{ secrets.IMPORT_API_KEY }}" >> .env
+          echo "IMPORT_API_SECRET=${{ secrets.IMPORT_API_SECRET }}" >> .env
+          echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
+          echo "REGION_VALUE=${{ secrets.REGION_VALUE }}" >> .env
+#          echo "ACCESS_KEY=${{ secrets.ACCESS_KEY }}" >> .env
+#          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "AWS_REGISTRY=${{ secrets.AWS_REGISTRY }}" >> .env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
 
       # AWS 자격 증명 설정
       - name: Configure AWS Credentials
